@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 	"time"
-	"yc_cron/background/config"
-	"yc_cron/background/router"
+	"yc_cron/config"
+	"yc_cron/router"
 )
 
 type Response struct {
