@@ -7,15 +7,13 @@ import {store} from "../store";
  */
 import sysRouter from "./modules/sys"
 
-import Login from "../views/sys/Login";
-
 Vue.use(VueRouter)
 
 const routes = [
     {
         path: '/',
         name: 'login',
-        component: Login,
+        component: () => import('../views/sys/Login'), //异步执行，懒加载，建议这样写
         meta: {
             needLogin: false,
             title: '登录',
