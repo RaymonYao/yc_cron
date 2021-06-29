@@ -39,7 +39,7 @@ const router = new VueRouter({
 
 router.beforeEach(async (to, from, next) => {
     if (store.getters['user/expiresAt'] <= (new Date()).getTime()) {
-        await store.dispatch('user/LoginOut', false) //store.dispatch等价于this.$store.dispatch
+        await store.dispatch('user/Logout', false) //store.dispatch等价于this.$store.dispatch
     }
     const token = store.getters['user/token']
     document.title = process.env.VUE_APP_TITLE + (to.meta.title ? '-' + to.meta.title : '')
@@ -54,6 +54,7 @@ router.beforeEach(async (to, from, next) => {
         }
     } else {    //无需登录
         if (token) {
+            //replace: true只是一个设置信息，告诉VUE本次操作后，不能通过浏览器后退按钮，返回前一个路由
             next({name: 'sys', replace: true});
         } else {
             next()

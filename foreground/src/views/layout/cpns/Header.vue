@@ -19,7 +19,7 @@
                 <el-dropdown-menu slot="dropdown">
                     <el-dropdown-item><i class="el-icon-user-solid"></i>个人信息</el-dropdown-item>
                     <el-dropdown-item @click.native="showModifyPwd"><i class="el-icon-key"></i>修改密码</el-dropdown-item>
-                    <el-dropdown-item @click.native="LoginOut"><i class="el-icon-cold-drink"></i>退出登录</el-dropdown-item>
+                    <el-dropdown-item @click.native="Logout"><i class="el-icon-cold-drink"></i>退出登录</el-dropdown-item>
                 </el-dropdown-menu>
             </el-dropdown>
         </div>
@@ -38,7 +38,7 @@
             }
         },
         methods: {
-            ...mapActions('user', ['LoginOut']),
+            ...mapActions('user', ['Logout']),
             triggerCollapse() {
                 this.$emit('triggerCollapse', !this.isCollapse)
             },

@@ -25,14 +25,14 @@ export const user = {
         setExpiresAt(state, expiresAt) {
             state.expiresAt = expiresAt
         },
-        LoginOut(state) {
+        Logout(state) {
             state.userInfo = {}
             state.token = ""
             state.expiresAt = ""
         },
     },
     actions: {
-        async LoginIn({commit}, loginInfo) { //参数解构  context == { commit: context.commit } == { commit }
+        async Login({commit}, loginInfo) { //参数解构  context == { commit: context.commit } == { commit }
             const res = await login(loginInfo)
             commit('setUserInfo', res.data.user)
             commit('setToken', res.data.token)
@@ -43,8 +43,8 @@ export const user = {
             }
             await router.push({path: String(redirect)})
         },
-        async LoginOut({commit}, redirect = true) {
-            commit("LoginOut")
+        async Logout({commit}, redirect = true) {
+            commit("Logout")
             if (redirect) await router.push({name: 'login', replace: true})
         }
     },

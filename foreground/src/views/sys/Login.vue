@@ -84,7 +84,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions("user", ["LoginIn"]),//将modules的user下的LoginIn映射到组件方法中
+    ...mapActions("user", ["Login"]),//将modules的user下的Login映射到组件方法中
     checkCapslock(e) {
       const {key} = e
       this.capsTooltip = key && key.length === 1 && (key >= 'A' && key <= 'Z')
@@ -99,7 +99,7 @@ export default {
     submitForm() {
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
-          this.LoginIn(this.loginForm).catch(() => {
+          this.Login(this.loginForm).catch(() => {
           });
           this.refreshCaptcha();
         } else {

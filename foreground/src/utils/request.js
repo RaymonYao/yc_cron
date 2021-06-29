@@ -6,7 +6,7 @@ const service = axios.create({
     baseURL: process.env.VUE_APP_DEPLOY_BASE_API,
     timeout: process.env.VUE_APP_DEPLOY_TIMEOUT //毫秒
 })
-let activeAxios = 0 //当前请求个数, 请求一次+1, 当=0时取消遮罩
+let activeAxios = 0 //当前请求个数, 请求一次+1, 当=0时取消遮罩（elementUI的全屏Loading是单例的，当页面有两个接口时，第一个接口loading的close事件会直接将第二个接口的loading实例也close）
 let loadingInstance = null; //遮罩层
 let timer = null;   //loading定时器
 const showLoading = () => {
@@ -61,7 +61,7 @@ service.interceptors.response.use(response => {
                 type: 'error',
             })
             if (response.data.data && response.data.data.reload) {
-                store.commit('user/LoginOut')
+                store.commit('user/Logout')
             }
             return Promise.reject(response.data.msg)
         }
