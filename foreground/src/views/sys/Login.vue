@@ -91,7 +91,7 @@ export default {
     },
     refreshCaptcha() {
       captcha({}).then((res) => {
-        let basePath = process.env.NODE_ENV === 'development' ? process.env.VUE_APP_DEPLOY_BASE_API : ''
+        let basePath = process.env.NODE_ENV === 'development' ? process.env.VUE_APP_CRON_BASE_API : ''
         this.picPath = basePath + res.data.picPath
         this.loginForm.captchaId = res.data.captchaId
       })
