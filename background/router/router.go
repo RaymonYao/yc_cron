@@ -13,10 +13,11 @@ func InitRouters() (router *gin.Engine) {
 	router = gin.Default()
 	router.Use(middleware.Cors()) //增加跨域请求头
 	routerGroup = router.Group("")
-
-	authRouter := routerGroup.Group("my")
+	authRouter := routerGroup.Group("auth")
 	{
-		authRouter.GET("test", Login)
+		authRouter.POST("login", Login)
+		authRouter.GET("captcha", Captcha)
+		authRouter.GET("captcha/:captchaId", CaptchaImg)
 	}
 	return
 }

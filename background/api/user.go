@@ -55,7 +55,7 @@ ERR:
 	return
 }
 
-//验证码生成
+// Captcha 验证码生成
 func Captcha(c *gin.Context) {
 	captchaId := captcha.NewLen(config.GConfig.Captcha.Long)
 	utils.OkDetailed(response.SysCaptchaResponse{
@@ -64,7 +64,7 @@ func Captcha(c *gin.Context) {
 	}, "获取验证码成功", c)
 }
 
-//验证码图片读取
+// CaptchaImg 验证码图片读取
 func CaptchaImg(c *gin.Context) {
 	utils.GinCaptchaServeHTTP(c.Writer, c.Request)
 }

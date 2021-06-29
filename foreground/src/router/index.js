@@ -38,7 +38,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-    if (store.getters['user/expiresAt'] <= (new Date()).getTime()) {
+    if (store.getters['user/expiresAt'] && store.getters['user/expiresAt'] <= (new Date()).getTime()) {
         await store.dispatch('user/Logout', false) //store.dispatch等价于this.$store.dispatch
     }
     const token = store.getters['user/token']

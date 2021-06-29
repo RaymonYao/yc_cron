@@ -10,7 +10,7 @@ import (
 	"yc_cron/config"
 )
 
-// 这里需要自行实现captcha 的gin模式
+// GinCaptchaServeHTTP 这里需要自行实现captcha 的gin模式
 func GinCaptchaServeHTTP(w http.ResponseWriter, r *http.Request) {
 	dir, file := path.Split(r.URL.Path)
 	ext := path.Ext(file)
