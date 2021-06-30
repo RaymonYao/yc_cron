@@ -6,6 +6,7 @@ import {store} from "../store";
  *  !!! 路由name 不要用中划线命名, 菜单输出时用了-作为分隔符
  */
 import sysRouter from "./modules/sys"
+import taskRouter from "./modules/task"
 
 Vue.use(VueRouter)
 
@@ -21,6 +22,7 @@ const routes = [
         }
     },
     sysRouter,
+    taskRouter,
     {
         path: '*',
         name: '404',
