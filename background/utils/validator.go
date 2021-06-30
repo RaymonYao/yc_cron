@@ -11,42 +11,42 @@ type Rules map[string][]string
 
 type RulesMap map[string]Rules
 
-// 非空 不能为其对应类型的0值
+// NotEmpty 非空 不能为其对应类型的0值
 func NotEmpty() string {
 	return "notEmpty"
 }
 
-// 小于入参(<) 如果为string array Slice则为长度比较 如果是 int uint float 则为数值比较
+// Lt 小于入参(<) 如果为string array Slice则为长度比较 如果是 int uint float 则为数值比较
 func Lt(mark string) string {
 	return "lt=" + mark
 }
 
-// 小于等于入参(<=) 如果为string array Slice则为长度比较 如果是 int uint float 则为数值比较
+// Le 小于等于入参(<=) 如果为string array Slice则为长度比较 如果是 int uint float 则为数值比较
 func Le(mark string) string {
 	return "le=" + mark
 }
 
-// 等于入参(==) 如果为string array Slice则为长度比较 如果是 int uint float 则为数值比较
+// Eq 等于入参(==) 如果为string array Slice则为长度比较 如果是 int uint float 则为数值比较
 func Eq(mark string) string {
 	return "eq=" + mark
 }
 
-// 不等于入参(!=)  如果为string array Slice则为长度比较 如果是 int uint float 则为数值比较
+// Ne 不等于入参(!=)  如果为string array Slice则为长度比较 如果是 int uint float 则为数值比较
 func Ne(mark string) string {
 	return "ne=" + mark
 }
 
-// 大于等于入参(>=) 如果为string array Slice则为长度比较 如果是 int uint float 则为数值比较
+// Ge 大于等于入参(>=) 如果为string array Slice则为长度比较 如果是 int uint float 则为数值比较
 func Ge(mark string) string {
 	return "ge=" + mark
 }
 
-// 大于入参(>) 如果为string array Slice则为长度比较 如果是 int uint float 则为数值比较
+// Gt 大于入参(>) 如果为string array Slice则为长度比较 如果是 int uint float 则为数值比较
 func Gt(mark string) string {
 	return "gt=" + mark
 }
 
-// 校验方法 接收两个参数  入参实例，规则map
+// Verify 校验方法 接收两个参数  入参实例，规则map
 func Verify(st interface{}, roleMap Rules) (err error) {
 	compareMap := map[string]bool{
 		"lt": true,

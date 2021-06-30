@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 	"yc_cron/config"
+	"yc_cron/model"
 	"yc_cron/router"
 )
 
@@ -40,5 +41,6 @@ func startServer() {
 
 func main() {
 	config.InitConfig()
+	model.InitModels()
 	startServer()
 }

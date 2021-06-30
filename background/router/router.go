@@ -19,5 +19,13 @@ func InitRouters() (router *gin.Engine) {
 		authRouter.GET("captcha", Captcha)
 		authRouter.GET("captcha/:captchaId", CaptchaImg)
 	}
+	sysRouter := routerGroup.Group("sys").Use(middleware.JWTAuth())
+	{
+		sysRouter.GET("getSysInfo", GetSysInfo)
+		sysRouter.POST("modifyPwd", ModifyPwd)
+		sysRouter.POST("getUserList", GetUserList)
+		sysRouter.POST("saveUser", SaveUser)
+		sysRouter.POST("setUserStatus", SetUserStatus)
+	}
 	return
 }

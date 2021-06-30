@@ -11,7 +11,7 @@ import (
 	"yc_cron/utils"
 )
 
-// 处理跨域请求,支持options访问
+// JWTAuth 处理跨域请求,支持options访问
 func JWTAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -67,7 +67,7 @@ var (
 	TokenInvalid     = errors.New("token 无法解析")
 )
 
-// 解析 token
+// ParseToken 解析 token
 func (j *JWT) ParseToken(tokenString string) (*request.CustomClaims, error) {
 	var (
 		token *jwt.Token
