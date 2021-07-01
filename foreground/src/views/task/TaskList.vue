@@ -61,12 +61,12 @@
       </el-pagination>
     </div>
 
-    <el-drawer title="任务添加/编辑" :visible.sync="userEditFormShow"
+    <el-drawer title="任务添加/编辑" :visible.sync="taskEditFormShow"
                direction="rtl"
                @opened="()=>{this.$refs.mInput.focus()}"
                :before-close="handleClose"
                size="30%">
-      <el-form ref="uForm" :model="taskForm" class="drawerForm" :rules="taskFormRule" label-width="70px">
+      <el-form ref="taskForm" :model="taskForm" class="drawerForm" :rules="taskFormRule" label-width="70px">
         <el-form-item label="任务名称">
           <el-input v-model.trim="taskForm.task_name" ref="mInput"></el-input>
         </el-form-item>
@@ -87,7 +87,7 @@
         </el-form-item>
         <el-form-item>
           <el-button @click="handleClose">取 消</el-button>
-          <el-button type="primary" @click="userSave">确 定</el-button>
+          <el-button type="primary" @click="taskSave">确 定</el-button>
         </el-form-item>
       </el-form>
     </el-drawer>
@@ -96,14 +96,14 @@
 
 <script>
 import tableInfo from '@/plugins/mixins/tableInfo'
-import {getTaskList} from "../../api/task";
+import {getTaskList,taskSave} from "../../api/task";
 
 export default {
   name: "UserList",
   mixins: [tableInfo],
   data() {
     return {
-      userEditFormShow: false,
+      taskEditFormShow: false,
       taskForm: {
         user_id: 0,
         group_id: 0,
@@ -133,11 +133,32 @@ export default {
   },
   methods: {
     getList: getTaskList,
-    userSave: function () {
-
+    showUserEdit(row) {
+      row.password = ""
+      for (let k in this.taskForm) {
+        this.$set(this.taskForm, k, row[k] ? row[k] : '')
+      }
+      this.taskEditFormShow = true
     },
-    handleClose: function () {
-
+    taskSave() {
+      this.$refs.uForm.validate(async (valid) => {
+        if (valid) {
+          await taskSave(this.userForm).then((res) => {
+            this.$message({
+              type: 'success',
+              message: res.msg,
+              showClose: true
+            });
+            // this.getTableData()
+            this.taskEditFormShow = false
+          }).catch(() => {
+          })
+        }
+      })
+    },
+    handleClose() {
+      this.$refs.taskForm.clearValidate()
+      this.taskEditFormShow = false
     }
   }
 }

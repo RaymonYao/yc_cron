@@ -8,3 +8,12 @@ export const getTaskList = (data) => {
         data: data
     })
 }
+
+//保存任务
+export const saveTask = (data) => {
+    return service({
+        url: "/sys/saveTask",
+        method: 'post',
+        data: data
+    })
+}

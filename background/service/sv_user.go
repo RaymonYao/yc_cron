@@ -9,7 +9,7 @@ func Login(u *model.User) (*model.User, error) {
 	return model.AuthLogin(u)
 }
 
-func UserList(search *request.ComPageInfo) ([]model.User, int, error) {
+func GetUserList(search *request.ComPageInfo) ([]model.User, int, error) {
 	return model.GetUserList(search)
 }
 

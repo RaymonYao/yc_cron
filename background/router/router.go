@@ -27,5 +27,17 @@ func InitRouters() (router *gin.Engine) {
 		sysRouter.POST("saveUser", SaveUser)
 		sysRouter.POST("setUserStatus", SetUserStatus)
 	}
+	groupRouter := routerGroup.Group("group").Use(middleware.JWTAuth())
+	{
+		groupRouter.POST("getGroupList", GetGroupList)
+		groupRouter.POST("saveGroup", SaveGroup)
+		groupRouter.POST("delGroup", DelGroup)
+	}
+	taskRouter := routerGroup.Group("task").Use(middleware.JWTAuth())
+	{
+		taskRouter.POST("GetTaskList", GetTaskList)
+		taskRouter.POST("saveTask", SaveTask)
+		taskRouter.POST("delTask", DelTask)
+	}
 	return
 }

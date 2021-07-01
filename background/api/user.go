@@ -77,7 +77,7 @@ func GetUserList(c *gin.Context) {
 		err      error
 	)
 	_ = c.ShouldBindJSON(&pageInfo)
-	if list, total, err = service.UserList(&pageInfo); err != nil {
+	if list, total, err = service.GetUserList(&pageInfo); err != nil {
 		utils.FailWithMessage("获取失败, Message: "+err.Error(), c)
 		return
 	}
