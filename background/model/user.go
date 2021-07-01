@@ -41,7 +41,7 @@ func AuthLogin(u *User) (userInter *User, err error) {
 func GetUserList(search *request.ComPageInfo) (userList []User, total int, err error) {
 	db := mdb
 	if search.Condition != "" && search.SearchValue != "" {
-		db = db.Where(search.Condition+" = ?", search.SearchValue)
+		db = db.Where(search.Condition+" like ?", "%"+search.SearchValue+"%")
 	}
 	if search.Status != 0 {
 		db = db.Where("status = ?", search.Status)

@@ -3,7 +3,7 @@ import service from '../utils/request'
 // 任务列表
 export const getTaskList = (data) => {
     return service({
-        url: "/sys/getTaskList",
+        url: "/task/getTaskList",
         method: 'post',
         data: data
     })
@@ -12,7 +12,7 @@ export const getTaskList = (data) => {
 //保存任务
 export const saveTask = (data) => {
     return service({
-        url: "/sys/saveTask",
+        url: "/task/saveTask",
         method: 'post',
         data: data
     })

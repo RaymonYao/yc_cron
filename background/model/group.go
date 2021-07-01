@@ -15,6 +15,7 @@ type Group struct {
 	UpdateUserid int       `json:"update_userid"`
 	CreateAt     time.Time `json:"create_at"`
 	UpdateAt     time.Time `json:"update_at"`
+	Refer        string    // 关联外键
 }
 
 func GetGroupList(search *request.BasePageInfo) (groupList []Group, total int, err error) {
@@ -25,7 +26,11 @@ func GetGroupList(search *request.BasePageInfo) (groupList []Group, total int, e
 	if err = db.Model(&groupList).Count(&total).Error; err != nil {
 		return
 	}
-	err = db.Limit(search.PageSize).Offset(search.PageSize * (search.CurrentPage - 1)).Find(&groupList).Error
+	if search.PageSize == 0 {
+		err = db.Find(&groupList).Error
+	} else {
+		err = db.Limit(search.PageSize).Offset(search.PageSize * (search.CurrentPage - 1)).Find(&groupList).Error
+	}
 	return
 }
 
@@ -50,10 +55,5 @@ func SaveGroup(p *Group) (err error) {
 			err = errors.New("该分组名称已存在")
 		}
 	}
-	return
-}
-
-func GetGroupById(groupId int) (group Group, err error) {
-	err = mdb.First(&group, groupId).Error
 	return
 }

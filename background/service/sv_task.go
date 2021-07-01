@@ -5,7 +5,7 @@ import (
 	"yc_cron/model/request"
 )
 
-func GetTaskList(search *request.ComPageInfo) ([]model.Task, int, error) {
+func GetTaskList(search *request.BasePageInfo) ([]model.Task, int, error) {
 	return model.GetTaskList(search)
 }
 

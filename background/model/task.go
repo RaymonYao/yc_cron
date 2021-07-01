@@ -8,17 +8,20 @@ import (
 )
 
 type Task struct {
-	TaskId       int    `json:"task_id" gorm:"PRIMARY_KEY"`
-	TaskName     string `json:"task_name"`
-	Description  string `json:"description"`
-	Group        Group
-	CronSpec     string    `json:"cron_spec"`
-	Command      string    `json:"command"`
-	Status       int       `json:"status"`
-	CreateUserid int       `json:"create_userid"`
-	UpdateUserid int       `json:"update_userid"`
-	CreateAt     time.Time `json:"create_at"`
-	UpdateAt     time.Time `json:"update_at"`
+	TaskId        int       `json:"task_id" gorm:"PRIMARY_KEY"`
+	GroupId       int       `json:"group_id"`
+	TaskName      string    `json:"task_name"`
+	Description   string    `json:"description"`
+	CronSpec      string    `json:"cron_spec"`
+	Command       string    `json:"command"`
+	Status        int       `json:"status"`
+	LastExecuteAt time.Time `json:"last_execute_at"`
+	NextExecuteAt time.Time `json:"next_execute_at"`
+	CreateUserid  int       `json:"create_userid"`
+	UpdateUserid  int       `json:"update_userid"`
+	CreateAt      time.Time `json:"create_at"`
+	UpdateAt      time.Time `json:"update_at"`
+	Group         Group
 }
 
 const (
@@ -26,27 +29,24 @@ const (
 	TaskStarting = 2 //已开始执行
 )
 
-func GetTaskList(search *request.ComPageInfo) (taskList []Task, total int, err error) {
+func GetTaskList(search *request.BasePageInfo) (taskList []Task, total int, err error) {
 	db := mdb
 	if search.Condition != "" && search.SearchValue != "" {
 		db = db.Where(search.Condition+" = ?", search.SearchValue)
-	}
-	if search.Status != 0 {
-		db = db.Where("status = ?", search.Status)
 	}
 	if err = db.Model(&taskList).Count(&total).Error; err != nil {
 		return
 	}
 	err = db.Limit(search.PageSize).Offset(search.PageSize * (search.CurrentPage - 1)).Find(&taskList).Error
+	for idx, tl := range taskList {
+		mdb.Where("group_id = ?", tl.GroupId).Find(&taskList[idx].Group)
+	}
 	return
 }
 
 func DelTask(taskId int) (err error) {
 	var task Task
-	if err = mdb.Where("task_id = ?", taskId).First(&task).Error; err != nil {
-		return
-	}
-	if err = mdb.Delete(&task).Error; err != nil {
+	if err = mdb.Delete(&task, taskId).Error; err != nil {
 		return
 	}
 	return
@@ -65,10 +65,5 @@ func SaveTask(p *Task) (err error) {
 			err = errors.New("该分组名称已存在")
 		}
 	}
-	return
-}
-
-func GetTaskById(taskId int, isInit bool) (task Task, err error) {
-	err = mdb.Where("task_id = ?", taskId).First(&task).Error
 	return
 }

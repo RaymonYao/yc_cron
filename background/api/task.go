@@ -12,7 +12,7 @@ import (
 
 func GetTaskList(c *gin.Context) {
 	var (
-		pageInfo request.ComPageInfo
+		pageInfo request.BasePageInfo
 		list     []model.Task
 		total    int
 		err      error

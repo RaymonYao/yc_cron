@@ -8,7 +8,7 @@
       </el-form-item>
       <el-form-item label="筛选条件" prop="condition">
         <el-select style="width: 120px" v-model="searchForm.sCondition" placeholder="请选择">
-          <el-option key="user_name" label="任务名" value="user_name"/>
+          <el-option key="task_name" label="任务名称" value="task_name"/>
         </el-select>
       </el-form-item>
       <el-form-item prop="searchValue">
@@ -23,25 +23,31 @@
     </div>
     <el-table :data="tableData" border style="width: 100%">
       <el-table-column
-          prop="user_id"
+          prop="task_id"
           label="ID"
-          width="120">
+          width="120"
+          align="center">
       </el-table-column>
       <el-table-column
-          prop="user_name"
-          label="登录名"
-          width="180">
+          prop="task_name"
+          label="任务名称"
+          width="180"
+          align="center">
       </el-table-column>
       <el-table-column
-          prop="nick_name"
-          label="用户昵称">
+          prop="cron_spec"
+          label="时间表达式"
+          align="center">
       </el-table-column>
       <el-table-column
-          label="用户状态">
+          prop="last_execute_at"
+          label="上次执行时间"
+          align="center">
       </el-table-column>
       <el-table-column
-          prop="create_at"
-          label="创建时间">
+          prop="next_execute_at"
+          label="下次执行时间"
+          align="center">
       </el-table-column>
       <el-table-column align="center" label="操作">
         <template slot-scope="scope">
@@ -71,23 +77,22 @@
           <el-input v-model.trim="taskForm.task_name" ref="mInput"></el-input>
         </el-form-item>
         <el-form-item label="任务说明">
-          <el-input type="textarea" v-model="taskForm.description"></el-input>
+          <el-input type="textarea" :autosize="{ minRows: 4, maxRows: 16}" v-model="taskForm.description"></el-input>
         </el-form-item>
-        <el-form-item label="分组">
-          <el-select v-model="taskForm.group_id" placeholder="未分组">
-            <el-option label="采购" value="shanghai"></el-option>
-            <el-option label="销售" value="beijing"></el-option>
+        <el-form-item label="所属分组" v-model="taskForm.group_id">
+          <el-select v-model="taskForm.group_id">
+            <el-option v-for="item in groupOptions" :key="item.group_id" :label="item.group_name" :value="item.group_id"/>
           </el-select>
         </el-form-item>
         <el-form-item label="cron表达式">
           <el-input v-model.trim="taskForm.cron_spec"></el-input>
         </el-form-item>
         <el-form-item label="命令脚本">
-          <el-input type="textarea" v-model="taskForm.command"></el-input>
+          <el-input type="textarea" :autosize="{ minRows: 4, maxRows: 16}" v-model="taskForm.command"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button @click="handleClose">取 消</el-button>
-          <el-button type="primary" @click="taskSave">确 定</el-button>
+          <el-button type="primary" @click="saveTask">确 定</el-button>
         </el-form-item>
       </el-form>
     </el-drawer>
@@ -96,7 +101,8 @@
 
 <script>
 import tableInfo from '@/plugins/mixins/tableInfo'
-import {getTaskList,taskSave} from "../../api/task";
+import {getTaskList, saveTask} from "../../api/task";
+import {getGroupList} from "../../api/group";
 
 export default {
   name: "UserList",
@@ -105,13 +111,14 @@ export default {
     return {
       taskEditFormShow: false,
       taskForm: {
-        user_id: 0,
-        group_id: 0,
+        task_id: 0,
+        group_id:0,
         task_name: '',
         description: '',
         cron_spec: '',
         command: ''
       },
+      groupOptions: '',
       taskFormRule: {},
       uStatus: [
         {
@@ -129,27 +136,28 @@ export default {
     }
   },
   created() {
-    // this.getTableData()
+    this.getTableData()
   },
   methods: {
     getList: getTaskList,
     showUserEdit(row) {
-      row.password = ""
+      console.log(row)
       for (let k in this.taskForm) {
         this.$set(this.taskForm, k, row[k] ? row[k] : '')
       }
+      this.getGroups()
       this.taskEditFormShow = true
     },
-    taskSave() {
+    saveTask() {
       this.$refs.uForm.validate(async (valid) => {
         if (valid) {
-          await taskSave(this.userForm).then((res) => {
+          await saveTask(this.userForm).then((res) => {
             this.$message({
               type: 'success',
               message: res.msg,
               showClose: true
             });
-            // this.getTableData()
+            this.getTableData()
             this.taskEditFormShow = false
           }).catch(() => {
           })
@@ -159,7 +167,13 @@ export default {
     handleClose() {
       this.$refs.taskForm.clearValidate()
       this.taskEditFormShow = false
-    }
+    },
+    async getGroups() {
+      await getGroupList({}).then((res) => {
+        this.groupOptions = res.data.list
+      }).catch(() => {
+      })
+    },
   }
 }
 </script>

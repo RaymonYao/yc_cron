@@ -8,7 +8,7 @@ const groupRouter = {
     redirect: '/group/groupList',
     meta: {
         title: '分组管理',
-        icon: 'el-icon-set-up'
+        icon: 'el-icon-s-grid'
     },
     children: [
         {

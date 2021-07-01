@@ -5,7 +5,6 @@ const taskRouter = {
     path: '/task',
     name: 'task',
     component: Layout,
-    redirect: '/task/taskList',
     meta: {
         title: '任务管理',
         icon: 'el-icon-set-up'

@@ -2,7 +2,6 @@ import service from '../utils/request'
 
 // 分组列表
 export const getGroupList = (data) => {
-    console.log(data)
     return service({
         url: "/group/getGroupList",
         method: 'post',

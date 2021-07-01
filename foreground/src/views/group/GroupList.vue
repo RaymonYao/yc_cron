@@ -87,7 +87,7 @@
 
 <script>
 import tableInfo from '@/plugins/mixins/tableInfo'
-import {delGroup, getGroupList, saveGroup} from "../../api/group";
+import {getGroupList, saveGroup,delGroup} from "../../api/group";
 
 export default {
   name: "GroupList",

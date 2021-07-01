@@ -23,7 +23,6 @@ export default {
             })
         },
         async getTableData(currentPage = this.currentPage, pageSize = this.pageSize) {
-            console.log(pageSize)
             const table = await this.getList({currentPage, pageSize, ...this.searchForm})
             this.tableData = table.data.list
             this.total = table.data.total
