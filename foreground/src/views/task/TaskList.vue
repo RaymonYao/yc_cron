@@ -19,7 +19,7 @@
       </el-form-item>
     </el-form>
     <div class="button-box">
-      <el-button @click="showUserEdit({})"><i class="el-icon-plus"></i> 新增任务</el-button>
+      <el-button @click="showTaskEdit({})"><i class="el-icon-plus"></i> 新增任务</el-button>
     </div>
     <el-table :data="tableData" border style="width: 100%">
       <el-table-column
@@ -51,7 +51,7 @@
       </el-table-column>
       <el-table-column align="center" label="操作">
         <template slot-scope="scope">
-          <el-button circle type="primary" @click="showUserEdit(scope.row)" icon="el-icon-edit"></el-button>
+          <el-button circle type="primary" @click="showTaskEdit(scope.row)" icon="el-icon-edit"></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -105,7 +105,7 @@ import {getTaskList, saveTask} from "../../api/task";
 import {getGroupList} from "../../api/group";
 
 export default {
-  name: "UserList",
+  name: "TaskList",
   mixins: [tableInfo],
   data() {
     return {
@@ -140,8 +140,7 @@ export default {
   },
   methods: {
     getList: getTaskList,
-    showUserEdit(row) {
-      console.log(row)
+    showTaskEdit(row) {
       for (let k in this.taskForm) {
         this.$set(this.taskForm, k, row[k] ? row[k] : '')
       }
@@ -149,9 +148,9 @@ export default {
       this.taskEditFormShow = true
     },
     saveTask() {
-      this.$refs.uForm.validate(async (valid) => {
+      this.$refs.taskForm.validate(async (valid) => {
         if (valid) {
-          await saveTask(this.userForm).then((res) => {
+          await saveTask(this.taskForm).then((res) => {
             this.$message({
               type: 'success',
               message: res.msg,
