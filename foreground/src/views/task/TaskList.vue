@@ -1,11 +1,6 @@
 <template>
   <div>
     <el-form ref="searchForm" :model="searchForm" :inline="true">
-      <el-form-item label="任务状态" prop="condition">
-        <el-select style="width: 120px" v-model.number="searchForm.status">
-          <el-option v-for="v in uStatus" :key="v.value" :label="v.label" :value="v.value"/>
-        </el-select>
-      </el-form-item>
       <el-form-item label="筛选条件" prop="condition">
         <el-select style="width: 120px" v-model="searchForm.sCondition" placeholder="请选择">
           <el-option key="task_name" label="任务名称" value="task_name"/>
@@ -52,6 +47,8 @@
       <el-table-column align="center" label="操作">
         <template slot-scope="scope">
           <el-button circle type="primary" @click="showTaskEdit(scope.row)" icon="el-icon-edit"></el-button>
+          <el-button type="danger" icon="el-icon-delete" circle @click="delTask(scope.row)"
+                     slot="reference"></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -66,72 +63,22 @@
           :total="total">
       </el-pagination>
     </div>
-
-    <el-drawer title="任务添加/编辑" :visible.sync="taskEditFormShow"
-               direction="rtl"
-               @opened="()=>{this.$refs.mInput.focus()}"
-               :before-close="handleClose"
-               size="30%">
-      <el-form ref="taskForm" :model="taskForm" class="drawerForm" :rules="taskFormRule" label-width="70px">
-        <el-form-item label="任务名称">
-          <el-input v-model.trim="taskForm.task_name" ref="mInput"></el-input>
-        </el-form-item>
-        <el-form-item label="任务说明">
-          <el-input type="textarea" :autosize="{ minRows: 4, maxRows: 16}" v-model="taskForm.description"></el-input>
-        </el-form-item>
-        <el-form-item label="所属分组" v-model="taskForm.group_id">
-          <el-select v-model="taskForm.group_id">
-            <el-option v-for="item in groupOptions" :key="item.group_id" :label="item.group_name" :value="item.group_id"/>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="cron表达式">
-          <el-input v-model.trim="taskForm.cron_spec"></el-input>
-        </el-form-item>
-        <el-form-item label="命令脚本">
-          <el-input type="textarea" :autosize="{ minRows: 4, maxRows: 16}" v-model="taskForm.command"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="handleClose">取 消</el-button>
-          <el-button type="primary" @click="saveTask">确 定</el-button>
-        </el-form-item>
-      </el-form>
-    </el-drawer>
+    <TaskEdit ref="taskEditorFormDrawer"></TaskEdit>
   </div>
 </template>
 
 <script>
 import tableInfo from '@/plugins/mixins/tableInfo'
-import {getTaskList, saveTask} from "../../api/task";
-import {getGroupList} from "../../api/group";
+import {getTaskList,delTask} from "@/api/task";
+import TaskEdit from "./cpns/TaskEdit";
 
 export default {
   name: "TaskList",
   mixins: [tableInfo],
+  components: {TaskEdit},
   data() {
     return {
-      taskEditFormShow: false,
-      taskForm: {
-        task_id: 0,
-        group_id:0,
-        task_name: '',
-        description: '',
-        cron_spec: '',
-        command: ''
-      },
-      groupOptions: '',
-      taskFormRule: {},
-      uStatus: [
-        {
-          value: 1,
-          label: '正常'
-        },
-        {
-          value: 2,
-          label: '禁用'
-        }
-      ],
       searchForm: {
-        status: 1   //默认查状态正常的用户
       }
     }
   },
@@ -141,38 +88,29 @@ export default {
   methods: {
     getList: getTaskList,
     showTaskEdit(row) {
-      for (let k in this.taskForm) {
-        this.$set(this.taskForm, k, row[k] ? row[k] : '')
-      }
-      this.getGroups()
-      this.taskEditFormShow = true
+      this.$refs.taskEditorFormDrawer.setEditVal(row)
     },
-    saveTask() {
-      this.$refs.taskForm.validate(async (valid) => {
-        if (valid) {
-          await saveTask(this.taskForm).then((res) => {
-            this.$message({
-              type: 'success',
-              message: res.msg,
-              showClose: true
-            });
-            this.getTableData()
-            this.taskEditFormShow = false
-          }).catch(() => {
+    delTask(row) {
+      this.$confirm('确认删除该任务?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        await delTask({task_id: row.task_id}).then((res) => {
+          this.$message({
+            type: 'success',
+            message: res.msg
           })
-        }
-      })
-    },
-    handleClose() {
-      this.$refs.taskForm.clearValidate()
-      this.taskEditFormShow = false
-    },
-    async getGroups() {
-      await getGroupList({}).then((res) => {
-        this.groupOptions = res.data.list
+          this.getTableData()
+        }).catch(() => {
+        })
       }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消'
+        })
       })
-    },
+    }
   }
 }
 </script>

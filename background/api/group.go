@@ -54,9 +54,8 @@ func SaveGroup(c *gin.Context) {
 	)
 	_ = c.ShouldBindJSON(&group)
 	groupVerify = utils.Rules{
-		"UserName": {utils.NotEmpty(), utils.Le("20")},
-		"Password": {utils.Le("18")},
-		"NickName": {utils.NotEmpty(), utils.Le("20")},
+		"GroupName":   {utils.NotEmpty(), utils.Le("200"), utils.Ge("3")},
+		"Description": {utils.NotEmpty()},
 	}
 	if err = utils.Verify(group, groupVerify); err != nil {
 		utils.FailWithMessage(err.Error(), c)

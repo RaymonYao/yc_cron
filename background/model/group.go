@@ -8,14 +8,13 @@ import (
 )
 
 type Group struct {
-	GroupId      uint      `json:"group_id" gorm:"PRIMARY_KEY"`
-	GroupName    string    `json:"group_name"`
-	Description  string    `json:"description"`
-	CreateUserid int       `json:"create_userid"`
-	UpdateUserid int       `json:"update_userid"`
-	CreateAt     time.Time `json:"create_at"`
-	UpdateAt     time.Time `json:"update_at"`
-	Refer        string    // 关联外键
+	GroupId      uint   `json:"group_id" gorm:"PRIMARY_KEY"`
+	GroupName    string `json:"group_name"`
+	Description  string `json:"description"`
+	CreateUserid int    `json:"create_userid"`
+	UpdateUserid int    `json:"update_userid"`
+	CreateTime   int64  `json:"create_time"`
+	UpdateTime   int64  `json:"update_time"`
 }
 
 func GetGroupList(search *request.BasePageInfo) (groupList []Group, total int, err error) {
@@ -42,13 +41,14 @@ func DelGroup(groupId int) (err error) {
 	return
 }
 
-func SaveGroup(p *Group) (err error) {
-	if p.GroupId == 0 {
-		p.CreateAt = time.Now()
-		p.UpdateAt = time.Now()
-		err = mdb.Save(p).Error
+func SaveGroup(group *Group) (err error) {
+	nowTime := time.Now().Unix()
+	if group.GroupId == 0 {
+		group.CreateTime = nowTime
+		group.UpdateTime = nowTime
+		err = mdb.Save(group).Error
 	} else {
-		err = mdb.Model(p).Updates(p).Error
+		err = mdb.Model(group).Updates(group).Error
 	}
 	if err != nil {
 		if strings.Index(err.Error(), "uni_group_name") != -1 {

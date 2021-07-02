@@ -17,3 +17,12 @@ export const saveTask = (data) => {
         data: data
     })
 }
+
+//删除任务
+export const delTask = (data) => {
+    return service({
+        url: "/task/delTask",
+        method: 'post',
+        params: data
+    })
+}

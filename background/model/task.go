@@ -8,20 +8,20 @@ import (
 )
 
 type Task struct {
-	TaskId        int       `json:"task_id" gorm:"PRIMARY_KEY"`
-	GroupId       int       `json:"group_id"`
-	TaskName      string    `json:"task_name"`
-	Description   string    `json:"description"`
-	CronSpec      string    `json:"cron_spec"`
-	Command       string    `json:"command"`
-	Status        int       `json:"status"`
-	LastExecuteAt time.Time `json:"last_execute_at"`
-	NextExecuteAt time.Time `json:"next_execute_at"`
-	CreateUserid  int       `json:"create_userid"`
-	UpdateUserid  int       `json:"update_userid"`
-	CreateAt      time.Time `json:"create_at"`
-	UpdateAt      time.Time `json:"update_at"`
-	Group         Group
+	TaskId          int    `json:"task_id" gorm:"PRIMARY_KEY"`
+	GroupId         int    `json:"group_id"`
+	TaskName        string `json:"task_name"`
+	Description     string `json:"description"`
+	CronSpec        string `json:"cron_spec"`
+	Command         string `json:"command"`
+	Status          int    `json:"status"`
+	LastExecuteTime int64  `json:"last_execute_time"`
+	NextExecuteTime int64  `json:"next_execute_time"`
+	CreateUserid    int    `json:"create_userid"`
+	UpdateUserid    int    `json:"update_userid"`
+	CreateTime      int64  `json:"create_time"`
+	UpdateTime      int64  `json:"update_time"`
+	Group           Group
 }
 
 const (
@@ -52,13 +52,14 @@ func DelTask(taskId int) (err error) {
 	return
 }
 
-func SaveTask(p *Task) (err error) {
-	if p.TaskId == 0 {
-		p.CreateAt = time.Now()
-		p.UpdateAt = time.Now()
-		err = mdb.Save(p).Error
+func SaveTask(task *Task) (err error) {
+	nowTime := time.Now().Unix()
+	if task.TaskId == 0 {
+		task.CreateTime = nowTime
+		task.UpdateTime = nowTime
+		err = mdb.Save(task).Error
 	} else {
-		err = mdb.Model(p).Updates(p).Error
+		err = mdb.Model(task).Updates(task).Error
 	}
 	if err != nil {
 		if strings.Index(err.Error(), "uni_task_name") != -1 {

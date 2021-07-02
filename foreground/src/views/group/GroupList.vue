@@ -59,48 +59,21 @@
           :total="total">
       </el-pagination>
     </div>
-
-    <el-drawer title="分组添加/编辑" :visible.sync="groupEditFormShow"
-               direction="rtl"
-               @opened="()=>{this.$refs.mInput.focus()}"
-               :before-close="handleClose"
-               size="30%">
-      <el-form ref="groupForm" :model="groupForm" class="drawerForm" :rules="groupFormRule" label-width="70px">
-        <el-form-item label="分组名称">
-          <el-input v-model.trim="groupForm.group_name" ref="mInput"></el-input>
-        </el-form-item>
-        <el-form-item label="分组说明">
-          <el-input
-              type="textarea"
-              :autosize="{ minRows: 8, maxRows: 16}"
-              v-model="groupForm.description">
-          </el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="handleClose">取 消</el-button>
-          <el-button type="primary" @click="saveGroup">确 定</el-button>
-        </el-form-item>
-      </el-form>
-    </el-drawer>
+    <GroupEdit ref="groupEditorFormDrawer"></GroupEdit>
   </div>
 </template>
 
 <script>
 import tableInfo from '@/plugins/mixins/tableInfo'
-import {getGroupList, saveGroup,delGroup} from "../../api/group";
+import {delGroup, getGroupList} from "../../api/group";
+import GroupEdit from "./cpns/GroupEdit";
 
 export default {
   name: "GroupList",
   mixins: [tableInfo],
+  components: {GroupEdit},
   data() {
     return {
-      groupEditFormShow: false,
-      groupForm: {
-        group_id: 0,
-        group_name: '',
-        description: ''
-      },
-      groupFormRule: {},
       searchForm: {}
     }
   },
@@ -110,31 +83,7 @@ export default {
   methods: {
     getList: getGroupList,
     showGroupEdit(row) {
-      row.password = ""
-      for (let k in this.groupForm) {
-        this.$set(this.groupForm, k, row[k] ? row[k] : '')
-      }
-      this.groupEditFormShow = true
-    },
-    saveGroup() {
-      this.$refs.groupForm.validate(async (valid) => {
-        if (valid) {
-          await saveGroup(this.groupForm).then((res) => {
-            this.$message({
-              type: 'success',
-              message: res.msg,
-              showClose: true
-            });
-            this.getTableData()
-            this.groupEditFormShow = false
-          }).catch(() => {
-          })
-        }
-      })
-    },
-    handleClose() {
-      this.$refs.groupForm.clearValidate()
-      this.groupEditFormShow = false
+      this.$refs.groupEditorFormDrawer.setEditVal(row)
     },
     delGroup(row) {
       this.$confirm('确认删除该分组?', '提示', {
@@ -157,6 +106,7 @@ export default {
         })
       })
     }
+
   }
 }
 </script>
