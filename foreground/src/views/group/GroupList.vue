@@ -36,9 +36,10 @@
           align="center">
       </el-table-column>
       <el-table-column
-          prop="create_at"
+          prop="create_time"
           label="创建时间"
-          align="center">
+          align="center"
+          :formatter="dateFormat">
       </el-table-column>
       <el-table-column align="center" label="操作">
         <template slot-scope="scope">
@@ -65,12 +66,13 @@
 
 <script>
 import tableInfo from '@/plugins/mixins/tableInfo'
-import {delGroup, getGroupList} from "../../api/group";
+import {delGroup, getGroupList} from "@/api/group";
 import GroupEdit from "./cpns/GroupEdit";
+import dateTool from "@/plugins/mixins/dateTool";
 
 export default {
   name: "GroupList",
-  mixins: [tableInfo],
+  mixins: [tableInfo, dateTool],
   components: {GroupEdit},
   data() {
     return {
