@@ -14,13 +14,18 @@ var (
 )
 
 type SysConfig struct {
-	Env           string      `json:"env"`
-	Port          int         `json:"port"`
-	DbConfig      *DbConfig   `json:"db"`
-	JwtSigningKey string      `json:"jwt-signing-key"`
-	Captcha       *Captcha    `json:"captcha"`
-	EtcdConfig    *EtcdConfig `json:"etcd"`
-	StartTime     time.Time   `json:"start_time"`
+	Env               string    `json:"env"`
+	Port              int       `json:"port"`
+	ViewPath          string    `json:"view_path"`
+	StaticDir         string    `json:"static_dir"`
+	DbConfig          *DbConfig `json:"db"`
+	JwtSigningKey     string    `json:"jwt-signing-key"`
+	Captcha           *Captcha  `json:"captcha"`
+	SshConnectTimeout int       `json:"ssh_connect_timeout"`
+	Repo              string    `json:"repo"`
+	RepoPackage       string    `json:"repo_package"`
+	ServerWorkDir     string    `json:"srv_work_dir"`
+	StartTime         time.Time `json:"start_time"`
 }
 
 type DbConfig struct {
@@ -39,14 +44,6 @@ type Captcha struct {
 	Long   int `json:"long"`
 	Width  int `json:"width"`
 	Height int `json:"height"`
-}
-
-type EtcdConfig struct {
-	EtcdEndpoints   []string `json:"etcdEndpoints"`
-	EtcdDialTimeout int      `json:"etcdDialTimeout"`
-	JobCronPrefix   string   `json:"jobCronPrefix"`
-	JobKillPrefix   string   `json:"jobKillPrefix"`
-	JobLockPrefix   string   `json:"jobKillPrefix"`
 }
 
 func InitConfig() {

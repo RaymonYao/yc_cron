@@ -11,21 +11,21 @@
 
                 <template v-for="r in $router.options.routes">
                     <template v-if="r.children && r.children.length">
-                        <el-submenu v-if="r.meta.menu !== false" :index="r.name">
+                        <el-submenu v-if="r.meta.menu !== false" :index="r.name" :key="r.name">
                             <template slot="title">
                                 <i :class="r.meta.icon ? r.meta.icon : 'el-icon-document'"></i>
                                 <span>{{r.meta.title}}</span>
                             </template>
 
                             <template v-for="cr in r.children">
-                                <el-menu-item v-if="cr.meta.menu !== false" :index="r.name + '-' + cr.name">
+                                <el-menu-item v-if="cr.meta.menu !== false" :index="r.name + '-' + cr.name" :key="r.name + '-' + cr.name">
                                     <i :class="cr.meta.icon ? cr.meta.icon : 'el-icon-document'"></i>
                                     {{cr.meta.title}}
                                 </el-menu-item>
                             </template>
                         </el-submenu>
                     </template>
-                    <el-menu-item v-else-if="r.meta.menu !== false" :index="r.name">
+                    <el-menu-item v-else-if="r.meta.menu !== false" :index="r.name" :key="r.name">
                         <i :class="r.meta.icon ? r.meta.icon : 'el-icon-document'"></i>
                         <span slot="title">{{r.meta.title}}</span>
                     </el-menu-item>
