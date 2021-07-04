@@ -1,13 +1,13 @@
 package model
 
 import (
+	"cron_master/config"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"log"
 	"os"
 	"sync"
-	"yc_cron/config"
 )
 
 var (

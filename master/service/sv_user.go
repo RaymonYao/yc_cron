@@ -1,8 +1,8 @@
 package service
 
 import (
-	"yc_cron/model"
-	"yc_cron/model/request"
+	"cron_master/model"
+	"cron_master/model/request"
 )
 
 func Login(u *model.User) (*model.User, error) {

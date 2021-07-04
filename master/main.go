@@ -1,15 +1,15 @@
 package main
 
 import (
+	"cron_master/config"
+	"cron_master/etcd"
+	"cron_master/model"
+	"cron_master/router"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"time"
-	"yc_cron/config"
-	"yc_cron/etcd"
-	"yc_cron/model"
-	"yc_cron/router"
 )
 
 func startServer() {

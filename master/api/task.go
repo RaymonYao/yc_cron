@@ -1,13 +1,13 @@
 package api
 
 import (
+	"cron_master/model"
+	"cron_master/model/request"
+	"cron_master/model/response"
+	"cron_master/service"
+	"cron_master/utils"
 	"github.com/gin-gonic/gin"
 	"strconv"
-	"yc_cron/model"
-	"yc_cron/model/request"
-	"yc_cron/model/response"
-	"yc_cron/service"
-	"yc_cron/utils"
 )
 
 func GetTaskList(c *gin.Context) {

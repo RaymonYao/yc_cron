@@ -1,8 +1,8 @@
 package api
 
 import (
+	"cron_master/utils"
 	"github.com/gin-gonic/gin"
-	"yc_cron/utils"
 )
 
 func GetSysInfo(c *gin.Context) {

@@ -1,6 +1,6 @@
 package response
 
-import "yc_cron/model"
+import "cron_master/model"
 
 type LoginResponse struct {
 	User      model.User `json:"user"`

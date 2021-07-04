@@ -1,14 +1,14 @@
 package middleware
 
 import (
+	"cron_master/config"
+	"cron_master/model"
+	"cron_master/model/request"
+	"cron_master/utils"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"time"
-	"yc_cron/config"
-	"yc_cron/model"
-	"yc_cron/model/request"
-	"yc_cron/utils"
 )
 
 // JWTAuth 处理跨域请求,支持options访问

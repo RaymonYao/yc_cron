@@ -1,16 +1,16 @@
 package api
 
 import (
+	"cron_master/config"
+	"cron_master/model"
+	"cron_master/model/request"
+	"cron_master/model/response"
+	"cron_master/router/middleware"
+	"cron_master/service"
+	"cron_master/utils"
 	"errors"
 	"github.com/dchest/captcha"
 	"github.com/gin-gonic/gin"
-	"yc_cron/config"
-	"yc_cron/model"
-	"yc_cron/model/request"
-	"yc_cron/model/response"
-	"yc_cron/router/middleware"
-	"yc_cron/service"
-	"yc_cron/utils"
 )
 
 func Login(c *gin.Context) {

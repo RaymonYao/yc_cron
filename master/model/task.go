@@ -1,12 +1,12 @@
 package model
 
 import (
+	"cron_master/etcd"
+	"cron_master/model/request"
 	"errors"
 	"github.com/jinzhu/gorm"
 	"strings"
 	"time"
-	"yc_cron/etcd"
-	"yc_cron/model/request"
 )
 
 type Task struct {

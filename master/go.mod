@@ -1,4 +1,4 @@
-module yc_cron
+module cron_master
 
 go 1.16
 

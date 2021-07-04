@@ -1,9 +1,9 @@
 package router
 
 import (
+	. "cron_master/api"
+	"cron_master/router/middleware"
 	"github.com/gin-gonic/gin"
-	. "yc_cron/api"
-	"yc_cron/router/middleware"
 )
 
 func InitRouters() (router *gin.Engine) {

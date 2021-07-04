@@ -1,10 +1,10 @@
 package model
 
 import (
+	"cron_master/model/request"
 	"errors"
 	"strings"
 	"time"
-	"yc_cron/model/request"
 )
 
 type Group struct {

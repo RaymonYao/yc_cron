@@ -2,9 +2,11 @@ package etcd
 
 import (
 	"context"
-	"cron_master/config"
+	yc_worker "cron_worker"
+	"cron_worker/config"
 	"encoding/json"
 	"fmt"
+	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientV3 "go.etcd.io/etcd/client/v3"
 	"strconv"
 	"time"
@@ -14,6 +16,7 @@ type Etcd struct {
 	Client *clientV3.Client
 	Kv     clientV3.KV
 	Lease  clientV3.Lease
+	Watcher clientV3.Watcher
 }
 
 var (
@@ -49,6 +52,7 @@ func InitEtcd() {
 		Kv:     kv,
 		Lease:  lease,
 	}
+	EClient.WatchJobs()
 	return
 }
 
@@ -84,30 +88,57 @@ func (eClient *Etcd) SaveJob(job *Job) (oldJob *Job, err error) {
 	return
 }
 
-// DeleteJob 删除任务
-func (eClient *Etcd) DeleteJob(Id int) (oldJob *Job, err error) {
+//监听任务变化
+func (eClient *Etcd) WatchJobs() (err error) {
 	var (
-		jobKey    string
-		delResp   *clientV3.DeleteResponse
-		oldJobObj Job
+		getResp            *clientV3.GetResponse
+		kvPair             *mvccpb.KeyValue
+		job                *Job
+		watchStartRevision int64
+		watchChan          clientV3.WatchChan
+		watchResp          clientV3.WatchResponse
+		watchEvent         *clientV3.Event
 	)
 
-	//etcd中保存任务的key
-	jobKey = config.GConfig.EtcdConfig.JobCronPrefix + strconv.Itoa(Id)
-
-	//从etcd中删除它
-	if delResp, err = eClient.Kv.Delete(context.TODO(), jobKey, clientV3.WithPrevKV()); err != nil {
+	//1, get一下job_cron_前缀的所有任务，并且获知当前集群的revision
+	if getResp, err = eClient.Kv.Get(context.TODO(), config.GConfig.EtcdConfig.JobCronPrefix, clientV3.WithPrefix()); err != nil {
 		return
 	}
 
-	//返回被删除的任务信息
-	if len(delResp.PrevKvs) != 0 {
-		//解析一下旧值，返回它
-		if err = json.Unmarshal(delResp.PrevKvs[0].Value, &oldJobObj); err != nil {
-			err = nil
+	//当前有哪些任务
+	for _, kvPair = range getResp.Kvs {
+		var job *Job
+		if err = json.Unmarshal(kvPair.Value, job); err != nil {
 			return
 		}
-		oldJob = &oldJobObj
+		yc_worker.JobChan <- job
 	}
+
+	//2,从该revision向后监听变化事件
+	go func() {
+		//监听协程
+		//从Get时刻的后续版本开始监听变化
+		watchStartRevision = getResp.Header.Revision + 1
+		//监听job_cron_前缀的任务后续变化
+		watchChan = eClient.Watcher.Watch(context.TODO(), config.GConfig.EtcdConfig.JobCronPrefix, clientV3.WithRev(watchStartRevision), clientV3.WithPrefix())
+		//处理监听事件
+		for watchResp = range watchChan {
+			for _, watchEvent = range watchResp.Events {
+				switch watchEvent.Type {
+				case mvccpb.PUT:
+					//任务保存事件
+					if err = json.Unmarshal(watchEvent.Kv.Value, job); err != nil {
+						continue
+					}
+					//构建一个更新Event
+					//jobEvent = common.BuildJobEvent(common.JOB_EVENT_DELETE, job)
+				case mvccpb.DELETE:
+
+				}
+				//变化推给scheduler
+				//GScheduler.PushJobEvent(jobEvent)
+			}
+		}
+	}()
 	return
 }

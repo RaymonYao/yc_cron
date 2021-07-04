@@ -1,11 +1,11 @@
 package model
 
 import (
+	"cron_master/model/request"
+	"cron_master/utils"
 	"errors"
 	"strings"
 	"time"
-	"yc_cron/model/request"
-	"yc_cron/utils"
 )
 
 type User struct {
