@@ -3,7 +3,7 @@
   "port": 8085,
   "db": {
     "host": "127.0.0.1",
-    "database": "cron_master",
+    "database": "yc_cron",
     "username": "root",
     "password": "123456",
     "port": 3306,

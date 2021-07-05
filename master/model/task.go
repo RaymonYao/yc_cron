@@ -67,9 +67,9 @@ func SaveTask(task *Task) (err error) {
 	db := mdb
 	err = db.Transaction(func(tx *gorm.DB) (e error) {
 		nowTime := time.Now().Unix()
+		task.UpdateTime = nowTime
 		if task.TaskId == 0 {
 			task.CreateTime = nowTime
-			task.UpdateTime = nowTime
 			e = tx.Save(task).Error
 		} else {
 			e = tx.Model(task).Updates(task).Error
