@@ -1,4 +1,4 @@
-package scheduler
+package cron
 
 import (
 	"context"
@@ -9,30 +9,27 @@ import (
 )
 
 var (
-	job           *Job
-	JobTable      map[int]*Job
-	JobResultChan chan *JobExecuteResult
-	err           error
-	GCron         *cron.Cron
-	EntryId       cron.EntryID
-	jobExisted    bool
+	job              *Job
+	JobScheduleTable map[int]*Job
+	JobResultChan    chan *JobExecuteResult
+	err              error
+	GCron            *cron.Cron
+	EntryId          cron.EntryID
 )
 
 // InitScheduler 初始化调度
 func InitScheduler() {
-	JobTable = make(map[int]*Job)
+	JobScheduleTable = make(map[int]*Job)
 	GCron = cron.New(cron.WithParser(cron.NewParser(
 		cron.SecondOptional | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow,
 	)))
 	go func() {
-		var (
-			jobResult *JobExecuteResult
-		)
 		for {
 			select {
-			case jobResult = <-JobResultChan:
-				//监听任务执行结果
-				fmt.Println(jobResult)
+			//监听任务执行结果
+			case jobResult := <-JobResultChan:
+				delete(JobExecutingTable, jobResult.Job.Id)
+				//todo写日志
 			}
 		}
 	}()
@@ -41,14 +38,15 @@ func InitScheduler() {
 
 // AddCron 调度队列中添加任务
 func AddCron(job *Job) {
-	if JobTable[job.Id] != nil {
-		oldJob := JobTable[job.Id]
+	if JobScheduleTable[job.Id] != nil {
+		oldJob := JobScheduleTable[job.Id]
 		fmt.Println(oldJob.EntryId)
 		GCron.Remove(oldJob.EntryId)
-		delete(JobTable, oldJob.Id)
+		delete(JobScheduleTable, oldJob.Id)
 	}
 
 	EntryId, err = GCron.AddFunc(job.CronSpec, func() {
+		ExecuteJob(job)
 		cmd := exec.CommandContext(context.TODO(), "/bin/bash", "-c", job.Command)
 		output, _ := cmd.CombinedOutput()
 		fmt.Println(string(output))
@@ -59,16 +57,16 @@ func AddCron(job *Job) {
 		return
 	}
 	job.EntryId = EntryId
-	JobTable[job.Id] = job
+	JobScheduleTable[job.Id] = job
 	return
 }
 
 // RemoveCron 调度队列中移除任务
 func RemoveCron(jobId int) {
-	if JobTable[jobId] != nil {
-		job = JobTable[jobId]
+	if JobScheduleTable[jobId] != nil {
+		job = JobScheduleTable[jobId]
 		GCron.Remove(job.EntryId)
-		delete(JobTable, jobId)
+		delete(JobScheduleTable, jobId)
 	}
 	return
 }

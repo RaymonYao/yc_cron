@@ -2,15 +2,15 @@ package main
 
 import (
 	"cron_worker/config"
-	"cron_worker/scheduler"
+	"cron_worker/cron"
 	"time"
 )
 
 func main() {
 	config.InitConfig()
-	scheduler.InitScheduler()
-	scheduler.InitEtcd()
-	//正常退出
+	cron.InitExecutor()
+	cron.InitScheduler()
+	cron.InitEtcd()
 	for {
 		time.Sleep(1 * time.Second)
 	}

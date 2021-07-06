@@ -1,9 +1,10 @@
-package scheduler
+package cron
 
 import (
 	"context"
 	"cron_worker/config"
 	"encoding/json"
+	"errors"
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientV3 "go.etcd.io/etcd/client/v3"
 	"strconv"
@@ -113,4 +114,90 @@ func (eClient *Etcd) WatchJobs() (err error) {
 		}
 	}()
 	return
+}
+
+func TryLock(job *Job) (jobLock *JobLock, err error) {
+	var (
+		leaseGrantResp *clientV3.LeaseGrantResponse
+		cancelCtx      context.Context
+		cancelFunc     context.CancelFunc
+		leaseId        clientV3.LeaseID
+		keepRespChan   <-chan *clientV3.LeaseKeepAliveResponse
+		txn            clientV3.Txn
+		lockKey        string
+		txnResp        *clientV3.TxnResponse
+	)
+
+	//1, 创建租约(5秒)
+	if leaseGrantResp, err = EClient.Lease.Grant(context.TODO(), 5); err != nil {
+		return
+	}
+
+	//context用于取消自动续租
+	cancelCtx, cancelFunc = context.WithCancel(context.TODO())
+
+	//续租ID
+	leaseId = leaseGrantResp.ID
+
+	//2, 自动续租
+	if keepRespChan, err = EClient.Lease.KeepAlive(cancelCtx, leaseId); err != nil {
+		goto FAIL
+	}
+
+	//3, 处理续租应答的协程
+	go func() {
+		var (
+			keepResp *clientV3.LeaseKeepAliveResponse
+		)
+		for {
+			select {
+			case keepResp = <-keepRespChan: //自动续租的应答
+				if keepResp == nil {
+					goto END
+				}
+			}
+		}
+	END:
+	}()
+
+	//4, 创建事务txn
+	txn = EClient.Kv.Txn(context.TODO())
+
+	//锁路径
+	lockKey = config.GConfig.EtcdConfig.JobLockPrefix + strconv.Itoa(job.Id)
+
+	//5,事务抢锁
+	txn.If(clientV3.Compare(clientV3.CreateRevision(lockKey), "=", 0)).
+		Then(clientV3.OpPut(lockKey, "", clientV3.WithLease(leaseId))).
+		Else(clientV3.OpGet(lockKey))
+
+	//提交事务
+	if txnResp, err = txn.Commit(); err != nil {
+		goto FAIL
+	}
+
+	//6,成功返回，失败释放租约
+	if !txnResp.Succeeded {
+		//锁被占用
+		err = errors.New("锁已经被占用")
+	}
+
+	//抢锁成功
+	jobLock.LeaseId = leaseId
+	jobLock.CancelFunc = cancelFunc
+	jobLock.IsLocked = true
+	return
+
+FAIL:
+	cancelFunc()                                  //取消自动续租
+	EClient.Lease.Revoke(context.TODO(), leaseId) //释放租约
+	return
+}
+
+// Unlock 释放锁
+func (jobLock *JobLock) Unlock() {
+	if jobLock.IsLocked {
+		jobLock.CancelFunc()                                  //取消我们程序自动续租的协程
+		EClient.Lease.Revoke(context.TODO(), jobLock.LeaseId) //释放租约
+	}
 }
