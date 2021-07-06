@@ -81,9 +81,9 @@ func (eClient *Etcd) WatchJobs() (err error) {
 		if err = json.Unmarshal(kvPair.Value, &job); err != nil {
 			return
 		}
-		JobTable[job.Id] = &job
+		AddCron(&job)
 	}
-	JobEventChan <- "event"
+	GCron.Start()
 
 	//2,从该revision向后监听变化事件
 	go func() {
@@ -103,14 +103,11 @@ func (eClient *Etcd) WatchJobs() (err error) {
 						if err = json.Unmarshal(watchEvent.Kv.Value, &job); err != nil {
 							continue
 						}
-						JobTable[job.Id] = &job
+						AddCron(&job)
 					case mvccpb.DELETE:
 						jobId, _ := strconv.Atoi(strings.TrimPrefix(string(watchEvent.Kv.Key), config.GConfig.EtcdConfig.JobCronPrefix))
-						if _, jobExisted := JobTable[jobId]; jobExisted {
-							delete(JobTable, jobId)
-						}
+						RemoveCron(jobId)
 					}
-					JobEventChan <- "event"
 				}
 			}
 		}

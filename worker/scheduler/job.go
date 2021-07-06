@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"context"
+	"github.com/robfig/cron/v3"
 	"time"
 )
 
@@ -11,6 +12,7 @@ type Job struct {
 	Name     string `json:"name"`     //任务名
 	Command  string `json:"command"`  //shell命令
 	CronSpec string `json:"cronSpec"` //cron表达式
+	EntryId  cron.EntryID
 }
 
 // JobExecuteInfo 任务执行状态
