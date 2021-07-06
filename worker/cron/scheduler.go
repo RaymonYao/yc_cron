@@ -1,17 +1,13 @@
 package cron
 
 import (
-	"context"
 	"fmt"
 	"github.com/robfig/cron/v3"
-	"os/exec"
-	"time"
 )
 
 var (
 	job              *Job
 	JobScheduleTable map[int]*Job
-	JobResultChan    chan *JobExecuteResult
 	err              error
 	GCron            *cron.Cron
 	EntryId          cron.EntryID
@@ -28,6 +24,7 @@ func InitScheduler() {
 			select {
 			//监听任务执行结果
 			case jobResult := <-JobResultChan:
+				fmt.Println(jobResult)
 				delete(JobExecutingTable, jobResult.Job.Id)
 				//todo写日志
 			}
@@ -47,11 +44,6 @@ func AddCron(job *Job) {
 
 	EntryId, err = GCron.AddFunc(job.CronSpec, func() {
 		ExecuteJob(job)
-		cmd := exec.CommandContext(context.TODO(), "/bin/bash", "-c", job.Command)
-		output, _ := cmd.CombinedOutput()
-		fmt.Println(string(output))
-		fmt.Println(time.Now())
-		fmt.Println("\n")
 	})
 	if err != nil {
 		return

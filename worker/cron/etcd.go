@@ -116,7 +116,7 @@ func (eClient *Etcd) WatchJobs() (err error) {
 	return
 }
 
-func TryLock(job *Job) (jobLock *JobLock, err error) {
+func (jobLock *JobLock) TryLock(job *Job) (err error) {
 	var (
 		leaseGrantResp *clientV3.LeaseGrantResponse
 		cancelCtx      context.Context

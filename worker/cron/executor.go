@@ -10,7 +10,7 @@ import (
 
 var (
 	JobExecutingTable map[int]*Job
-	jobResultChan     chan *JobExecuteResult //任务结果管道
+	JobResultChan     chan *JobExecuteResult //任务结果管道
 )
 
 // InitExecutor 初始化执行器
@@ -55,7 +55,7 @@ func ExecuteJob(job *Job) {
 		//随机睡眠(0-1s) 为了防止各个服务器时间不准导致的抢锁不公平，正常情况下各个服务器会用ntp时间服务器进行时间同步
 		time.Sleep(time.Duration(rand.Intn(1000)) * time.Millisecond)
 
-		jobLock, err = TryLock(job)
+		err = jobLock.TryLock(job)
 		defer jobLock.Unlock()
 
 		if err != nil {
@@ -83,7 +83,7 @@ func ExecuteJob(job *Job) {
 			job.CancelFunc = cancelFunc
 		}
 		//任务执行完成后，把执行的结果返回给Scheduler,Scheduler会从executingTable中删除掉执行记录
-		jobResultChan <- result
+		JobResultChan <- result
 	}()
 	return
 }
