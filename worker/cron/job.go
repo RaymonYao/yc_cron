@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/robfig/cron/v3"
 	clientv3 "go.etcd.io/etcd/client/v3"
-	"time"
 )
 
 // Job 存放在ETCD上的Job定时任务结构
@@ -20,10 +19,10 @@ type Job struct {
 // JobExecuteResult 任务执行结果
 type JobExecuteResult struct {
 	Job       *Job
-	Output    []byte    //脚本输出
-	Err       error     //脚本错误原因
-	StartTime time.Time //启动时间
-	EndTime   time.Time //结束时间
+	Output    string //脚本输出
+	Err       error  //脚本错误原因
+	StartTime int64  //开始执行时间
+	EndTime   int64  //结束时间
 }
 
 // JobLock 分布式锁(Txn事务)

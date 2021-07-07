@@ -5,6 +5,7 @@ import (
 	"cron_master/model/request"
 	"errors"
 	"github.com/jinzhu/gorm"
+	"github.com/robfig/cron/v3"
 	"strings"
 	"time"
 )
@@ -17,7 +18,7 @@ type Task struct {
 	CronSpec        string `json:"cron_spec"`
 	Command         string `json:"command"`
 	Status          int    `json:"status"`
-	LastExecuteTime int64  `json:"last_execute_time"`
+	PrevExecuteTime int64  `json:"prev_execute_time"`
 	NextExecuteTime int64  `json:"next_execute_time"`
 	CreateUserid    int    `json:"create_userid"`
 	UpdateUserid    int    `json:"update_userid"`
@@ -25,11 +26,6 @@ type Task struct {
 	UpdateTime      int64  `json:"update_time"`
 	Group           Group
 }
-
-const (
-	TaskPrePare  = 1 //初始状态
-	TaskStarting = 2 //已开始执行
-)
 
 func GetTaskList(search *request.BasePageInfo) (taskList []Task, total int, err error) {
 	db := mdb
@@ -45,6 +41,11 @@ func GetTaskList(search *request.BasePageInfo) (taskList []Task, total int, err 
 		err = db.Limit(search.PageSize).Offset(search.PageSize * (search.CurrentPage - 1)).Find(&taskList).Error
 		for idx, tl := range taskList {
 			mdb.Where("group_id = ?", tl.GroupId).Find(&taskList[idx].Group)
+			//实时计算下次任务的执行时间
+			p := cron.NewParser(cron.SecondOptional | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow)
+			var schedule cron.Schedule
+			schedule, _ = p.Parse(tl.CronSpec)
+			taskList[idx].NextExecuteTime = schedule.Next(time.Now()).Unix()
 		}
 	}
 	return
@@ -76,7 +77,7 @@ func SaveTask(task *Task) (err error) {
 		}
 		if e != nil {
 			if strings.Index(e.Error(), "uni_task_name") != -1 {
-				e = errors.New("该分组名称已存在")
+				e = errors.New("该任务名称已存在")
 			}
 		} else {
 			_, e = etcd.EClient.SaveJob(&etcd.Job{

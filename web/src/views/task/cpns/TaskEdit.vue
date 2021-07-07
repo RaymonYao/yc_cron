@@ -7,7 +7,7 @@
     <el-form ref="taskForm" :model="taskForm" class="drawerForm" :rules="taskFormRules"
              label-width="100px">
       <el-form-item label="任务名称" prop="task_name">
-        <el-input v-model.trim="taskForm.task_name" ref="mInput"></el-input>
+        <el-input v-model="taskForm.task_name" ref="mInput"></el-input>
       </el-form-item>
       <el-form-item label="任务说明" prop="description">
         <el-input type="textarea" :autosize="{ minRows: 4, maxRows: 16}" v-model="taskForm.description"></el-input>
@@ -18,7 +18,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="cron表达式" prop="cron_spec">
-        <el-input v-model.trim="taskForm.cron_spec"></el-input>
+        <el-input v-model="taskForm.cron_spec"></el-input>
       </el-form-item>
       <el-form-item label="命令脚本" prop="command">
         <el-input type="textarea" :autosize="{ minRows: 4, maxRows: 16}" v-model="taskForm.command"></el-input>

@@ -35,14 +35,16 @@
           align="center">
       </el-table-column>
       <el-table-column
-          prop="last_execute_at"
+          prop="prev_execute_time"
           label="上次执行时间"
-          align="center">
+          align="center"
+          :formatter="dateFormat">
       </el-table-column>
       <el-table-column
-          prop="next_execute_at"
+          prop="next_execute_time"
           label="下次执行时间"
-          align="center">
+          align="center"
+          :formatter="dateFormat">
       </el-table-column>
       <el-table-column align="center" label="操作">
         <template slot-scope="scope">
@@ -71,10 +73,11 @@
 import tableInfo from '@/plugins/mixins/tableInfo'
 import {getTaskList,delTask} from "@/api/task";
 import TaskEdit from "./cpns/TaskEdit";
+import dateTool from "@/plugins/mixins/dateTool";
 
 export default {
   name: "TaskList",
-  mixins: [tableInfo],
+  mixins: [tableInfo,dateTool],
   components: {TaskEdit},
   data() {
     return {

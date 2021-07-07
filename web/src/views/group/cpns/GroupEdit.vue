@@ -6,7 +6,7 @@
              size="30%">
     <el-form ref="groupForm" :model="groupForm" class="drawerForm" :rules="groupFormRules" label-width="70px">
       <el-form-item label="分组名称" prop="group_name">
-        <el-input v-model.trim="groupForm.group_name" ref="mInput"></el-input>
+        <el-input v-model="groupForm.group_name" ref="mInput"></el-input>
       </el-form-item>
       <el-form-item label="分组说明" prop="description">
         <el-input

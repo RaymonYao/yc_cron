@@ -40,16 +40,13 @@ func ExecuteJob(job *Job) {
 		)
 
 		//任务结果
-		result = &JobExecuteResult{
-			Job:    job,
-			Output: make([]byte, 0),
-		}
+		result = &JobExecuteResult{Job: job}
 
 		//初始化分布式锁
 		jobLock = &JobLock{Job: job}
 
 		//记录任务开始时间
-		result.StartTime = time.Now()
+		result.StartTime = time.Now().Unix()
 
 		//上锁
 		//随机睡眠(0-1s) 为了防止各个服务器时间不准导致的抢锁不公平，正常情况下各个服务器会用ntp时间服务器进行时间同步
@@ -61,10 +58,10 @@ func ExecuteJob(job *Job) {
 		if err != nil {
 			//上锁失败
 			result.Err = err
-			result.EndTime = time.Now()
+			result.EndTime = time.Now().Unix()
 		} else {
 			//上锁成功后，重置任务启动时间
-			result.StartTime = time.Now()
+			result.StartTime = time.Now().Unix()
 
 			//用于取消任务执行
 			cancelCtx, cancelFunc := context.WithCancel(context.TODO())
@@ -77,8 +74,8 @@ func ExecuteJob(job *Job) {
 
 			//记录任务结束时间
 			result.Job = job
-			result.EndTime = time.Now()
-			result.Output = output
+			result.EndTime = time.Now().Unix()
+			result.Output = string(output)
 			result.Err = err
 			job.CancelFunc = cancelFunc
 		}

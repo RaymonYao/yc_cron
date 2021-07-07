@@ -16,8 +16,21 @@ var (
 type SysConfig struct {
 	Env        string      `json:"env"`
 	Port       int         `json:"port"`
+	DbConfig   *DbConfig   `json:"db"`
 	EtcdConfig *EtcdConfig `json:"etcd"`
 	StartTime  time.Time   `json:"start_time"`
+}
+
+type DbConfig struct {
+	Host            string `json:"host"`
+	Port            int    `json:"port"`
+	Database        string `json:"database"`
+	Username        string `json:"username"`
+	Password        string `json:"password"`
+	Charset         string `json:"charset"`
+	TimeOut         int    `json:"timeout"`
+	MaxOpenConnects int    `json:"maxOpenConnects"` //数据库连接池最大连接数
+	MaxIdleConnects int    `json:"maxIdleConnects"` //连接池最大允许的空闲连接数, 超过的会被关闭
 }
 
 type EtcdConfig struct {

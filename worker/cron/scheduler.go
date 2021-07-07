@@ -1,6 +1,7 @@
 package cron
 
 import (
+	"cron_worker/model"
 	"fmt"
 	"github.com/robfig/cron/v3"
 )
@@ -24,9 +25,13 @@ func InitScheduler() {
 			select {
 			//监听任务执行结果
 			case jobResult := <-JobResultChan:
-				fmt.Println(jobResult)
+				fmt.Println(jobResult.Output)
 				delete(JobExecutingTable, jobResult.Job.Id)
-				//todo写日志
+				_ = model.SaveTask(&model.Task{
+					TaskId:          jobResult.Job.Id,
+					PrevExecuteTime: jobResult.StartTime,
+				})
+				//写日志，暂时写进mysql，方便列表展示，后期会解耦，做成文件日志，用ELK去收集日志
 			}
 		}
 	}()
