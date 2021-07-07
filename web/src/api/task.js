@@ -26,3 +26,21 @@ export const delTask = (data) => {
         params: data
     })
 }
+
+//暂停任务
+export const pauseTask = (data) => {
+    return service({
+        url: "/task/pauseTask",
+        method: 'post',
+        params: data
+    })
+}
+
+//开启任务
+export const startTask = (data) => {
+    return service({
+        url: "/task/startTask",
+        method: 'post',
+        params: data
+    })
+}

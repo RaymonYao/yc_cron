@@ -19,7 +19,7 @@ type Task struct {
 	Command         string `json:"command"`
 	Status          int    `json:"status"`
 	PrevExecuteTime int64  `json:"prev_execute_time"`
-	NextExecuteTime int64  `json:"next_execute_time"`
+	NextExecuteTime int64  `json:"next_execute_time" gorm:"-"` //gorm:"-" 设置忽略某字段
 	CreateUserid    int    `json:"create_userid"`
 	UpdateUserid    int    `json:"update_userid"`
 	CreateTime      int64  `json:"create_time"`
@@ -27,8 +27,9 @@ type Task struct {
 	Group           Group
 }
 
-func GetTaskList(search *request.BasePageInfo) (taskList []Task, total int, err error) {
+func GetTaskList(search *request.ComPageInfo) (taskList []Task, total int, err error) {
 	db := mdb
+	db = db.Where("status = ?", search.Status)
 	if search.Condition != "" && search.SearchValue != "" {
 		db = db.Where(search.Condition+" = ?", search.SearchValue)
 	}
@@ -64,6 +65,37 @@ func DelTask(taskId int) (err error) {
 	return
 }
 
+func PauseTask(taskId int) (err error) {
+	db := mdb
+	err = db.Transaction(func(tx *gorm.DB) (e error) {
+		//gorm对于空值(0, nil, "", false)这些会被忽略掉，这里改用map来更新
+		//data := make(map[string]interface{})
+		//data["status"] = 0
+		//data := map[string]interface{}{"status": 0}
+		e = tx.Model(Task{TaskId: taskId}).Updates(map[string]interface{}{"status": 0}).Error
+		_, e = etcd.EClient.DeleteJob(taskId)
+		return
+	})
+	return
+}
+
+func StartTask(taskId int) (err error) {
+	db := mdb
+	err = db.Transaction(func(tx *gorm.DB) (e error) {
+		task := &Task{TaskId: taskId, Status: 1}
+		e = tx.Model(&task).Updates(&task).Error
+		tx.Where("task_id = ?", taskId).Find(&task)
+		_, err = etcd.EClient.SaveJob(&etcd.Job{
+			Id:       task.TaskId,
+			Name:     task.TaskName,
+			Command:  task.Command,
+			CronSpec: task.CronSpec,
+		})
+		return
+	})
+	return
+}
+
 func SaveTask(task *Task) (err error) {
 	db := mdb
 	err = db.Transaction(func(tx *gorm.DB) (e error) {
@@ -80,25 +112,27 @@ func SaveTask(task *Task) (err error) {
 				e = errors.New("该任务名称已存在")
 			}
 		} else {
-			_, e = etcd.EClient.SaveJob(&etcd.Job{
-				Id:       task.TaskId,
-				Name:     task.TaskName,
-				Command:  task.Command,
-				CronSpec: task.CronSpec,
-			})
+			if task.Status == 1 {
+				_, e = etcd.EClient.SaveJob(&etcd.Job{
+					Id:       task.TaskId,
+					Name:     task.TaskName,
+					Command:  task.Command,
+					CronSpec: task.CronSpec,
+				})
+			}
 		}
 		return
 	})
 	return
 }
 
-func InitEtcdJob() (err error) {
+func InitEtcdJob() {
 	var (
 		taskList []Task
 	)
-	taskList, _, err = GetTaskList(&request.BasePageInfo{})
+	taskList, _, _ = GetTaskList(&request.ComPageInfo{Status: 1})
 	for _, task := range taskList {
-		etcd.EClient.SaveJob(&etcd.Job{
+		_, _ = etcd.EClient.SaveJob(&etcd.Job{
 			Id:       task.TaskId,
 			Name:     task.TaskName,
 			Command:  task.Command,

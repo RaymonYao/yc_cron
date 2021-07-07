@@ -32,6 +32,24 @@ func InitScheduler() {
 					PrevExecuteTime: jobResult.StartTime,
 				})
 				//写日志，暂时写进mysql，方便列表展示，后期会解耦，做成文件日志，用ELK去收集日志
+				var (
+					status int
+					errStr string
+				)
+				if jobResult.Err != nil {
+					status = 1
+					errStr = jobResult.Err.Error()
+				} else {
+					status = 0
+					errStr = ""
+				}
+				_ = model.SaveTaskLog(&model.TaskLog{
+					TaskId:      jobResult.Job.Id,
+					OutPut:      jobResult.Output,
+					Error:       errStr,
+					Status:      status,
+					ProcessTime: jobResult.EndTime - jobResult.StartTime,
+				})
 			}
 		}
 	}()

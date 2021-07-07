@@ -12,7 +12,7 @@ import (
 
 func GetTaskList(c *gin.Context) {
 	var (
-		pageInfo request.BasePageInfo
+		pageInfo request.ComPageInfo
 		list     []model.Task
 		total    int
 		err      error
@@ -44,6 +44,38 @@ func DelTask(c *gin.Context) {
 		return
 	}
 	utils.OkWithMessage("删除成功", c)
+}
+
+func PauseTask(c *gin.Context) {
+	var (
+		taskId int
+		err    error
+	)
+	if taskId, err = strconv.Atoi(c.Query("task_id")); err != nil {
+		utils.FailWithMessage(err.Error(), c)
+		return
+	}
+	if err = service.PauseTask(taskId); err != nil {
+		utils.FailWithMessage("暂停失败, 原因:"+err.Error(), c)
+		return
+	}
+	utils.OkWithMessage("暂停成功", c)
+}
+
+func StartTask(c *gin.Context) {
+	var (
+		taskId int
+		err    error
+	)
+	if taskId, err = strconv.Atoi(c.Query("task_id")); err != nil {
+		utils.FailWithMessage(err.Error(), c)
+		return
+	}
+	if err = service.StartTask(taskId); err != nil {
+		utils.FailWithMessage("开启失败, 原因:"+err.Error(), c)
+		return
+	}
+	utils.OkWithMessage("开启成功", c)
 }
 
 func SaveTask(c *gin.Context) {

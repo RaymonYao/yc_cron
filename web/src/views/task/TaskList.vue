@@ -48,9 +48,13 @@
       </el-table-column>
       <el-table-column align="center" label="操作">
         <template slot-scope="scope">
-          <el-button circle type="primary" @click="showTaskEdit(scope.row)" icon="el-icon-edit"></el-button>
-          <el-button type="danger" icon="el-icon-delete" circle @click="delTask(scope.row)"
-                     slot="reference"></el-button>
+          <el-button title="编辑" type="primary" circle @click="showTaskEdit(scope.row)" icon="el-icon-edit"></el-button>
+          <el-button title="暂停" type="success" icon="el-icon-switch-button" circle @click="pauseTask(scope.row)"
+                     slot="reference" v-show="scope.row.status"></el-button>
+          <el-button title="开启" type="warning" icon="el-icon-caret-right" circle @click="startTask(scope.row)"
+                     slot="reference" v-show="!scope.row.status"></el-button>
+          <el-button title="删除" type="danger" icon="el-icon-delete" circle @click="delTask(scope.row)"
+                     slot="reference" v-show="!scope.row.status"></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -71,18 +75,17 @@
 
 <script>
 import tableInfo from '@/plugins/mixins/tableInfo'
-import {getTaskList,delTask} from "@/api/task";
+import {delTask, getTaskList, pauseTask, startTask} from "@/api/task";
 import TaskEdit from "./cpns/TaskEdit";
 import dateTool from "@/plugins/mixins/dateTool";
 
 export default {
   name: "TaskList",
-  mixins: [tableInfo,dateTool],
+  mixins: [tableInfo, dateTool],
   components: {TaskEdit},
   data() {
     return {
-      searchForm: {
-      }
+      searchForm: {}
     }
   },
   created() {
@@ -100,6 +103,48 @@ export default {
         type: 'warning'
       }).then(async () => {
         await delTask({task_id: row.task_id}).then((res) => {
+          this.$message({
+            type: 'success',
+            message: res.msg
+          })
+          this.getTableData()
+        }).catch(() => {
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消'
+        })
+      })
+    },
+    pauseTask(row) {
+      this.$confirm('确认暂停该任务?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        await pauseTask({task_id: row.task_id}).then((res) => {
+          this.$message({
+            type: 'success',
+            message: res.msg
+          })
+          this.getTableData()
+        }).catch(() => {
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消'
+        })
+      })
+    },
+    startTask(row) {
+      this.$confirm('确认开启该任务?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        await startTask({task_id: row.task_id}).then((res) => {
           this.$message({
             type: 'success',
             message: res.msg
