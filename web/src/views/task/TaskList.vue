@@ -70,7 +70,7 @@
                      slot="reference"></el-button>
           <el-button title="删除" type="danger" icon="el-icon-delete" circle @click="delTask(scope.row)"
                      slot="reference" v-show="!scope.row.status"></el-button>
-          <el-button title="查看日志" type="info" icon="el-icon-document" circle @click="delTask(scope.row)"
+          <el-button title="查看日志" type="info" icon="el-icon-document" circle @click="openLog(scope.row)"
                      slot="reference"></el-button>
         </template>
       </el-table-column>
@@ -232,6 +232,15 @@ export default {
           type: 'info',
           message: '已取消'
         })
+      })
+    },
+    openLog(row) {
+      this.$router.push({
+        path: '/log',
+        query: {
+          sCondition: 'task_id',
+          sValue: row.task_id
+        }
       })
     }
   }
