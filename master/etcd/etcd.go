@@ -63,10 +63,12 @@ func (eClient *Etcd) SaveJob(job *Job) (oldJob *Job, err error) {
 
 	//etcd的保存key
 	jobKey = config.GConfig.EtcdConfig.JobCronPrefix + strconv.Itoa(job.Id)
+
 	//任务信息json
 	if jobValue, err = json.Marshal(job); err != nil {
 		return
 	}
+
 	//保存到etcd
 	if putResp, err = eClient.Kv.Put(context.TODO(), jobKey, string(jobValue), clientV3.WithPrevKV()); err != nil {
 		fmt.Println(err)
@@ -108,6 +110,38 @@ func (eClient *Etcd) DeleteJob(Id int) (oldJob *Job, err error) {
 			return
 		}
 		oldJob = &oldJobObj
+	}
+	return
+}
+
+// RunJob 立即执行任务
+func (eClient *Etcd) RunJob(job *Job) (oldJob *Job, err error) {
+	var (
+		jobRunKey      string
+		jobValue       []byte
+		leaseGrantResp *clientV3.LeaseGrantResponse
+		leaseId        clientV3.LeaseID
+	)
+
+	//通知worker立即执行该任务的key
+	jobRunKey = config.GConfig.EtcdConfig.JobRunPrefix + strconv.Itoa(job.Id)
+
+	//让worker监听到一次put操作，创建一个租约让其稍后自动过期即可，这里设置了30秒，随意设置即可
+	if leaseGrantResp, err = eClient.Lease.Grant(context.TODO(), 30); err != nil {
+		return
+	}
+
+	//租约ID
+	leaseId = leaseGrantResp.ID
+
+	//任务信息json
+	if jobValue, err = json.Marshal(job); err != nil {
+		return
+	}
+
+	//保存到etcd
+	if _, err = eClient.Kv.Put(context.TODO(), jobRunKey, string(jobValue), clientV3.WithLease(leaseId)); err != nil {
+		return
 	}
 	return
 }

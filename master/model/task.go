@@ -29,7 +29,9 @@ type Task struct {
 
 func GetTaskList(search *request.ComPageInfo) (taskList []Task, total int, err error) {
 	db := mdb
-	db = db.Where("status = ?", search.Status)
+	if search.Status != -1 {
+		db = db.Where("status = ?", search.Status)
+	}
 	if search.Condition != "" && search.SearchValue != "" {
 		db = db.Where(search.Condition+" = ?", search.SearchValue)
 	}
@@ -44,8 +46,7 @@ func GetTaskList(search *request.ComPageInfo) (taskList []Task, total int, err e
 			mdb.Where("group_id = ?", tl.GroupId).Find(&taskList[idx].Group)
 			//实时计算下次任务的执行时间
 			p := cron.NewParser(cron.SecondOptional | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow)
-			var schedule cron.Schedule
-			schedule, _ = p.Parse(tl.CronSpec)
+			schedule, _ := p.Parse(tl.CronSpec)
 			taskList[idx].NextExecuteTime = schedule.Next(time.Now()).Unix()
 		}
 	}
@@ -56,7 +57,7 @@ func DelTask(taskId int) (err error) {
 	db := mdb
 	err = db.Transaction(func(tx *gorm.DB) (e error) {
 		var task Task
-		if e = tx.Delete(&task, taskId).Error; err != nil {
+		if e = tx.Delete(&task, taskId).Error; e != nil {
 			return
 		}
 		_, e = etcd.EClient.DeleteJob(taskId)
@@ -72,7 +73,9 @@ func PauseTask(taskId int) (err error) {
 		//data := make(map[string]interface{})
 		//data["status"] = 0
 		//data := map[string]interface{}{"status": 0}
-		e = tx.Model(Task{TaskId: taskId}).Updates(map[string]interface{}{"status": 0}).Error
+		if e = tx.Model(Task{TaskId: taskId}).Updates(map[string]interface{}{"status": 0}).Error; e != nil {
+			return
+		}
 		_, e = etcd.EClient.DeleteJob(taskId)
 		return
 	})
@@ -83,9 +86,27 @@ func StartTask(taskId int) (err error) {
 	db := mdb
 	err = db.Transaction(func(tx *gorm.DB) (e error) {
 		task := &Task{TaskId: taskId, Status: 1}
-		e = tx.Model(&task).Updates(&task).Error
+		if e = tx.Model(&task).Updates(&task).Error; e != nil {
+			return
+		}
 		tx.Where("task_id = ?", taskId).Find(&task)
 		_, err = etcd.EClient.SaveJob(&etcd.Job{
+			Id:       task.TaskId,
+			Name:     task.TaskName,
+			Command:  task.Command,
+			CronSpec: task.CronSpec,
+		})
+		return
+	})
+	return
+}
+
+func RunTask(taskId int) (err error) {
+	db := mdb
+	err = db.Transaction(func(tx *gorm.DB) (e error) {
+		task := &Task{TaskId: taskId}
+		tx.Where("task_id = ?", taskId).Find(&task)
+		_, err = etcd.EClient.RunJob(&etcd.Job{
 			Id:       task.TaskId,
 			Name:     task.TaskName,
 			Command:  task.Command,

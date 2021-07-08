@@ -24,3 +24,7 @@ func PauseTask(taskId int) error {
 func StartTask(taskId int) error {
 	return model.StartTask(taskId)
 }
+
+func RunTask(taskId int) error {
+	return model.RunTask(taskId)
+}

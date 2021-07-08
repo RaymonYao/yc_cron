@@ -40,6 +40,7 @@ func InitRouters() (router *gin.Engine) {
 		taskRouter.POST("delTask", DelTask)
 		taskRouter.POST("pauseTask", PauseTask)
 		taskRouter.POST("startTask", StartTask)
+		taskRouter.POST("runTask", RunTask)
 	}
 	return
 }

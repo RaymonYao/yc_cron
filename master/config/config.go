@@ -45,8 +45,9 @@ type EtcdConfig struct {
 	EtcdEndpoints   []string `json:"etcdEndpoints"`
 	EtcdDialTimeout int      `json:"etcdDialTimeout"`
 	JobCronPrefix   string   `json:"jobCronPrefix"`
+	JobLockPrefix   string   `json:"jobLockPrefix"`
+	JobRunPrefix    string   `json:"jobRunPrefix"`
 	JobKillPrefix   string   `json:"jobKillPrefix"`
-	JobLockPrefix   string   `json:"jobKillPrefix"`
 }
 
 func InitConfig() {

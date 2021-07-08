@@ -44,3 +44,12 @@ export const startTask = (data) => {
         params: data
     })
 }
+
+//执行任务
+export const runTask = (data) => {
+    return service({
+        url: "/task/runTask",
+        method: 'post',
+        params: data
+    })
+}

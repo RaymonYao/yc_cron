@@ -18,7 +18,8 @@
     ],
     "etcdDialTimeout": 5000,
     "jobCronPrefix": "job_cron_",
-    "jobKillPrefix": "job_kill_",
-    "jobLockPrefix": "job_lock_"
+    "jobLockPrefix": "job_lock_",
+    "jobRunPrefix": "job_run_",
+    "jobKillPrefix": "job_kill_"
   }
 }

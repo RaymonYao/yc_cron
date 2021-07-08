@@ -1,6 +1,11 @@
 <template>
   <div>
     <el-form ref="searchForm" :model="searchForm" :inline="true">
+      <el-form-item label="任务状态" prop="condition">
+        <el-select style="width: 120px" v-model.number="searchForm.status">
+          <el-option v-for="v in tStatus" :key="v.value" :label="v.label" :value="v.value"/>
+        </el-select>
+      </el-form-item>
       <el-form-item label="筛选条件" prop="condition">
         <el-select style="width: 120px" v-model="searchForm.sCondition" placeholder="请选择">
           <el-option key="task_name" label="任务名称" value="task_name"/>
@@ -53,8 +58,14 @@
                      slot="reference" v-show="scope.row.status"></el-button>
           <el-button title="开启" type="warning" icon="el-icon-caret-right" circle @click="startTask(scope.row)"
                      slot="reference" v-show="!scope.row.status"></el-button>
+          <el-button title="立即执行" type="primary" icon="el-icon-refresh-right" circle @click="runTask(scope.row)"
+                     slot="reference"></el-button>
+          <el-button title="强杀" type="danger" icon="el-icon-scissors" circle @click="killTask(scope.row)"
+                     slot="reference"></el-button>
           <el-button title="删除" type="danger" icon="el-icon-delete" circle @click="delTask(scope.row)"
                      slot="reference" v-show="!scope.row.status"></el-button>
+          <el-button title="查看日志" type="info" icon="el-icon-document" circle @click="delTask(scope.row)"
+                     slot="reference"></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -75,7 +86,7 @@
 
 <script>
 import tableInfo from '@/plugins/mixins/tableInfo'
-import {delTask, getTaskList, pauseTask, startTask} from "@/api/task";
+import {delTask, getTaskList, pauseTask, startTask,runTask} from "@/api/task";
 import TaskEdit from "./cpns/TaskEdit";
 import dateTool from "@/plugins/mixins/dateTool";
 
@@ -85,7 +96,23 @@ export default {
   components: {TaskEdit},
   data() {
     return {
-      searchForm: {}
+      searchForm: {
+        status: -1   //默认请选择
+      },
+      tStatus: [
+        {
+          value: -1,
+          label: '请选择'
+        },
+        {
+          value: 0,
+          label: '未开启'
+        },
+        {
+          value: 1,
+          label: '已开启'
+        }
+      ],
     }
   },
   created() {
@@ -145,6 +172,27 @@ export default {
         type: 'warning'
       }).then(async () => {
         await startTask({task_id: row.task_id}).then((res) => {
+          this.$message({
+            type: 'success',
+            message: res.msg
+          })
+          this.getTableData()
+        }).catch(() => {
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消'
+        })
+      })
+    },
+    runTask(row) {
+      this.$confirm('确认执行该任务?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        await runTask({task_id: row.task_id}).then((res) => {
           this.$message({
             type: 'success',
             message: res.msg

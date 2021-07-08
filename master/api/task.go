@@ -78,6 +78,22 @@ func StartTask(c *gin.Context) {
 	utils.OkWithMessage("开启成功", c)
 }
 
+func RunTask(c *gin.Context) {
+	var (
+		taskId int
+		err    error
+	)
+	if taskId, err = strconv.Atoi(c.Query("task_id")); err != nil {
+		utils.FailWithMessage(err.Error(), c)
+		return
+	}
+	if err = service.RunTask(taskId); err != nil {
+		utils.FailWithMessage("执行失败, 原因:"+err.Error(), c)
+		return
+	}
+	utils.OkWithMessage("已在后台执行", c)
+}
+
 func SaveTask(c *gin.Context) {
 	var (
 		task       model.Task

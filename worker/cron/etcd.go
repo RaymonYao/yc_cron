@@ -58,6 +58,9 @@ func InitEtcd() {
 	if err = EClient.WatchJobs(); err != nil {
 		return
 	}
+	if err = EClient.WatchRunJobs(); err != nil {
+		return
+	}
 	return
 }
 
@@ -108,6 +111,40 @@ func (eClient *Etcd) WatchJobs() (err error) {
 					case mvccpb.DELETE:
 						jobId, _ := strconv.Atoi(strings.TrimPrefix(string(watchEvent.Kv.Key), config.GConfig.EtcdConfig.JobCronPrefix))
 						RemoveCron(jobId)
+					}
+				}
+			}
+		}
+	}()
+	return
+}
+
+// WatchRunJobs 监听手动执行的任务
+func (eClient *Etcd) WatchRunJobs() (err error) {
+	var (
+		watchChan  clientV3.WatchChan
+		watchResp  clientV3.WatchResponse
+		watchEvent *clientV3.Event
+	)
+	GCron.Start()
+
+	//2,从该revision向后监听变化事件
+	go func() {
+		for {
+			watchChan = EClient.Watcher.Watch(context.TODO(), config.GConfig.EtcdConfig.JobRunPrefix, clientV3.WithPrefix())
+			//处理监听事件
+			for watchResp = range watchChan {
+				for _, watchEvent = range watchResp.Events {
+					var job Job
+					//任务保存事件
+					switch watchEvent.Type {
+					case mvccpb.PUT:
+						if err = json.Unmarshal(watchEvent.Kv.Value, &job); err != nil {
+							continue
+						}
+						ExecuteJob(&job) //手动执行一次任务
+					case mvccpb.DELETE:
+						////job_run_租约过期，被自动删除
 					}
 				}
 			}
