@@ -35,6 +35,12 @@
           align="center">
       </el-table-column>
       <el-table-column
+          prop="Group.group_name"
+          label="分组名称"
+          width="180"
+          align="center">
+      </el-table-column>
+      <el-table-column
           prop="cron_spec"
           label="时间表达式"
           align="center">
@@ -112,7 +118,7 @@ export default {
           value: 1,
           label: '已开启'
         }
-      ],
+      ]
     }
   },
   created() {

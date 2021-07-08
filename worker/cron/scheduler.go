@@ -37,7 +37,7 @@ func InitScheduler() {
 					errStr string
 				)
 				if jobResult.Err != nil {
-					status = 1
+					status = -1
 					errStr = jobResult.Err.Error()
 				} else {
 					status = 0

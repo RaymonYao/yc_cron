@@ -42,6 +42,9 @@ func GetTaskList(search *request.ComPageInfo) (taskList []Task, total int, err e
 		err = db.Find(&taskList).Error
 	} else {
 		err = db.Limit(search.PageSize).Offset(search.PageSize * (search.CurrentPage - 1)).Find(&taskList).Error
+		if err != nil {
+			return
+		}
 		for idx, tl := range taskList {
 			mdb.Where("group_id = ?", tl.GroupId).Find(&taskList[idx].Group)
 			//实时计算下次任务的执行时间

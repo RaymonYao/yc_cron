@@ -43,5 +43,9 @@ func InitRouters() (router *gin.Engine) {
 		taskRouter.POST("runTask", RunTask)
 		taskRouter.POST("killTask", KillTask)
 	}
+	logRouter := routerGroup.Group("log").Use(middleware.JWTAuth())
+	{
+		logRouter.POST("getLogList", GetLogList)
+	}
 	return
 }

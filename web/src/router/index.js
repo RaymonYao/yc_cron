@@ -8,6 +8,7 @@ import {store} from "../store";
 import sysRouter from "./modules/sys"
 import groupRouter from "./modules/group"
 import taskRouter from "./modules/task"
+import logRouter from "./modules/log"
 
 Vue.use(VueRouter)
 
@@ -25,6 +26,7 @@ const routes = [
     sysRouter,
     groupRouter,
     taskRouter,
+    logRouter,
     {
         path: '*',
         name: '404',
