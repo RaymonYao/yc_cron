@@ -103,17 +103,22 @@ func StartTask(taskId int) (err error) {
 
 func RunTask(taskId int) (err error) {
 	db := mdb
-	err = db.Transaction(func(tx *gorm.DB) (e error) {
-		task := &Task{TaskId: taskId}
-		tx.Where("task_id = ?", taskId).Find(&task)
-		_, err = etcd.EClient.RunJob(&etcd.Job{
-			Id:       task.TaskId,
-			Name:     task.TaskName,
-			Command:  task.Command,
-			CronSpec: task.CronSpec,
-		})
-		return
+	task := &Task{TaskId: taskId}
+	db.Where("task_id = ?", taskId).Find(&task)
+	err = etcd.EClient.RunJob(&etcd.Job{
+		Id:       task.TaskId,
+		Name:     task.TaskName,
+		Command:  task.Command,
+		CronSpec: task.CronSpec,
 	})
+	if err != nil {
+		return
+	}
+	return
+}
+
+func KillTask(taskId int) (err error) {
+	err = etcd.EClient.KillJob(taskId)
 	return
 }
 

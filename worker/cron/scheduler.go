@@ -60,7 +60,6 @@ func InitScheduler() {
 func AddCron(job *Job) {
 	if JobScheduleTable[job.Id] != nil {
 		oldJob := JobScheduleTable[job.Id]
-		fmt.Println(oldJob.EntryId)
 		GCron.Remove(oldJob.EntryId)
 		delete(JobScheduleTable, oldJob.Id)
 	}

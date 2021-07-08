@@ -61,6 +61,9 @@ func InitEtcd() {
 	if err = EClient.WatchRunJobs(); err != nil {
 		return
 	}
+	if err = EClient.WatchKillJobs(); err != nil {
+		return
+	}
 	return
 }
 
@@ -126,9 +129,7 @@ func (eClient *Etcd) WatchRunJobs() (err error) {
 		watchResp  clientV3.WatchResponse
 		watchEvent *clientV3.Event
 	)
-	GCron.Start()
 
-	//2,从该revision向后监听变化事件
 	go func() {
 		for {
 			watchChan = EClient.Watcher.Watch(context.TODO(), config.GConfig.EtcdConfig.JobRunPrefix, clientV3.WithPrefix())
@@ -145,6 +146,38 @@ func (eClient *Etcd) WatchRunJobs() (err error) {
 						ExecuteJob(&job) //手动执行一次任务
 					case mvccpb.DELETE:
 						////job_run_租约过期，被自动删除
+					}
+				}
+			}
+		}
+	}()
+	return
+}
+
+// WatchKillJobs 监听被强杀的任务
+func (eClient *Etcd) WatchKillJobs() (err error) {
+	var (
+		watchChan  clientV3.WatchChan
+		watchResp  clientV3.WatchResponse
+		watchEvent *clientV3.Event
+	)
+
+	//2,从该revision向后监听变化事件
+	go func() {
+		for {
+			watchChan = EClient.Watcher.Watch(context.TODO(), config.GConfig.EtcdConfig.JobKillPrefix, clientV3.WithPrefix())
+			//处理监听事件
+			for watchResp = range watchChan {
+				for _, watchEvent = range watchResp.Events {
+					//强杀保存事件
+					switch watchEvent.Type {
+					case mvccpb.PUT:
+						jobId, _ := strconv.Atoi(strings.TrimPrefix(string(watchEvent.Kv.Key), config.GConfig.EtcdConfig.JobKillPrefix))
+						if JobExecutingTable[jobId] != nil {
+							JobExecutingTable[jobId].CancelFunc() //执行强杀函数
+						}
+					case mvccpb.DELETE:
+						////job_kill_租约过期，被自动删除
 					}
 				}
 			}

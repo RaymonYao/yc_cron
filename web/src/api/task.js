@@ -53,3 +53,12 @@ export const runTask = (data) => {
         params: data
     })
 }
+
+//强杀任务
+export const killTask = (data) => {
+    return service({
+        url: "/task/killTask",
+        method: 'post',
+        params: data
+    })
+}

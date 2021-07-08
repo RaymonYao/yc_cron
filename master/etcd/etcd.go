@@ -87,7 +87,7 @@ func (eClient *Etcd) SaveJob(job *Job) (oldJob *Job, err error) {
 }
 
 // DeleteJob 删除任务
-func (eClient *Etcd) DeleteJob(Id int) (oldJob *Job, err error) {
+func (eClient *Etcd) DeleteJob(tackId int) (oldJob *Job, err error) {
 	var (
 		jobKey    string
 		delResp   *clientV3.DeleteResponse
@@ -95,7 +95,7 @@ func (eClient *Etcd) DeleteJob(Id int) (oldJob *Job, err error) {
 	)
 
 	//etcd中保存任务的key
-	jobKey = config.GConfig.EtcdConfig.JobCronPrefix + strconv.Itoa(Id)
+	jobKey = config.GConfig.EtcdConfig.JobCronPrefix + strconv.Itoa(tackId)
 
 	//从etcd中删除它
 	if delResp, err = eClient.Kv.Delete(context.TODO(), jobKey, clientV3.WithPrevKV()); err != nil {
@@ -115,7 +115,7 @@ func (eClient *Etcd) DeleteJob(Id int) (oldJob *Job, err error) {
 }
 
 // RunJob 立即执行任务
-func (eClient *Etcd) RunJob(job *Job) (oldJob *Job, err error) {
+func (eClient *Etcd) RunJob(job *Job) (err error) {
 	var (
 		jobRunKey      string
 		jobValue       []byte
@@ -123,7 +123,6 @@ func (eClient *Etcd) RunJob(job *Job) (oldJob *Job, err error) {
 		leaseId        clientV3.LeaseID
 	)
 
-	//通知worker立即执行该任务的key
 	jobRunKey = config.GConfig.EtcdConfig.JobRunPrefix + strconv.Itoa(job.Id)
 
 	//让worker监听到一次put操作，创建一个租约让其稍后自动过期即可，这里设置了30秒，随意设置即可
@@ -141,6 +140,31 @@ func (eClient *Etcd) RunJob(job *Job) (oldJob *Job, err error) {
 
 	//保存到etcd
 	if _, err = eClient.Kv.Put(context.TODO(), jobRunKey, string(jobValue), clientV3.WithLease(leaseId)); err != nil {
+		return
+	}
+	return
+}
+
+// KillJob 杀死任务
+func (eClient *Etcd) KillJob(taskId int) (err error) {
+	var (
+		jobKillKey     string
+		leaseGrantResp *clientV3.LeaseGrantResponse
+		leaseId        clientV3.LeaseID
+	)
+
+	jobKillKey = config.GConfig.EtcdConfig.JobKillPrefix + strconv.Itoa(taskId)
+
+	//让worker监听到一次put操作，创建一个租约让其稍后自动过期即可，这里设置了30秒，随意设置即可
+	if leaseGrantResp, err = eClient.Lease.Grant(context.TODO(), 30); err != nil {
+		return
+	}
+
+	//租约ID
+	leaseId = leaseGrantResp.ID
+
+	//保存到etcd
+	if _, err = eClient.Kv.Put(context.TODO(), jobKillKey, "", clientV3.WithLease(leaseId)); err != nil {
 		return
 	}
 	return

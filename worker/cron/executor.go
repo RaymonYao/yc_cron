@@ -27,8 +27,6 @@ func ExecuteJob(job *Job) {
 		return
 	}
 
-	JobExecutingTable[job.Id] = job
-
 	//开启协程执行任务
 	go func() {
 		var (
@@ -69,6 +67,9 @@ func ExecuteJob(job *Job) {
 			//执行shell命令
 			cmd = exec.CommandContext(cancelCtx, "/bin/bash", "-c", job.Command)
 
+			job.CancelFunc = cancelFunc
+			JobExecutingTable[job.Id] = job
+
 			//执行并捕获输出
 			output, err = cmd.CombinedOutput()
 
@@ -77,7 +78,6 @@ func ExecuteJob(job *Job) {
 			result.EndTime = time.Now().Unix()
 			result.Output = string(output)
 			result.Err = err
-			job.CancelFunc = cancelFunc
 		}
 		//任务执行完成后，把执行的结果返回给Scheduler,Scheduler会从executingTable中删除掉执行记录
 		JobResultChan <- result

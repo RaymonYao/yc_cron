@@ -28,3 +28,7 @@ func StartTask(taskId int) error {
 func RunTask(taskId int) error {
 	return model.RunTask(taskId)
 }
+
+func KillTask(taskId int) error {
+	return model.KillTask(taskId)
+}

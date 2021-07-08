@@ -86,7 +86,7 @@
 
 <script>
 import tableInfo from '@/plugins/mixins/tableInfo'
-import {delTask, getTaskList, pauseTask, startTask,runTask} from "@/api/task";
+import {delTask, getTaskList, killTask, pauseTask, runTask, startTask} from "@/api/task";
 import TaskEdit from "./cpns/TaskEdit";
 import dateTool from "@/plugins/mixins/dateTool";
 
@@ -193,6 +193,27 @@ export default {
         type: 'warning'
       }).then(async () => {
         await runTask({task_id: row.task_id}).then((res) => {
+          this.$message({
+            type: 'success',
+            message: res.msg
+          })
+          this.getTableData()
+        }).catch(() => {
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消'
+        })
+      })
+    },
+    killTask(row) {
+      this.$confirm('确认强杀该任务?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        await killTask({task_id: row.task_id}).then((res) => {
           this.$message({
             type: 'success',
             message: res.msg
