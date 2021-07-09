@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -20,7 +19,6 @@ type TaskLog struct {
 func SaveTaskLog(taskLog *TaskLog) (err error) {
 	db := mdb
 	taskLog.CreateTime = time.Now().Unix()
-	fmt.Println(taskLog)
 	err = db.Save(taskLog).Error
 	return
 }
