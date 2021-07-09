@@ -78,6 +78,7 @@ func ExecuteJob(job *Job) {
 			result.EndTime = time.Now().Unix()
 			result.Output = string(output)
 			result.Err = err
+			result.RunWorker, _ = GetLocalIP()
 		}
 		//任务执行完成后，把执行的结果返回给Scheduler,Scheduler会从executingTable中删除掉执行记录
 		JobResultChan <- result

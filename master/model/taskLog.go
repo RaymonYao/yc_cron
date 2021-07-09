@@ -14,6 +14,7 @@ type TaskLog struct {
 	StartTime  int64  `json:"start_time"`
 	EndTime    int64  `json:"end_time"`
 	CreateTime int64  `json:"create_time"`
+	RunWorker  string `json:"run_worker"`
 	Task       Task
 }
 

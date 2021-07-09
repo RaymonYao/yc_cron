@@ -23,6 +23,7 @@ type JobExecuteResult struct {
 	Err       error  //脚本错误原因
 	StartTime int64  //开始执行时间
 	EndTime   int64  //结束时间
+	RunWorker string //执行节点
 }
 
 // JobLock 分布式锁(Txn事务)

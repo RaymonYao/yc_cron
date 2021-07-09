@@ -50,6 +50,7 @@ func InitScheduler() {
 					Status:    status,
 					StartTime: jobResult.StartTime,
 					EndTime:   jobResult.EndTime,
+					RunWorker: jobResult.RunWorker,
 				})
 			}
 		}

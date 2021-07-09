@@ -289,7 +289,7 @@ func (eClient *Etcd) InitRegister() (err error) {
 		localIp        string
 	)
 	//本机IP
-	if localIp, err = getLocalIP(); err != nil {
+	if localIp, err = GetLocalIP(); err != nil {
 		return
 	}
 
@@ -335,8 +335,8 @@ func (eClient *Etcd) InitRegister() (err error) {
 	}
 }
 
-//获取本机网卡IP
-func getLocalIP() (ipv4 string, err error) {
+// GetLocalIP 获取本机网卡IP
+func GetLocalIP() (ipv4 string, err error) {
 	var (
 		addrs   []net.Addr
 		addr    net.Addr

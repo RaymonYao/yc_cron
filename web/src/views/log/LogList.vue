@@ -35,21 +35,21 @@
       <el-table-column
           prop="Task.task_name"
           label="任务名称"
-          width="200"
+          width="300"
           align="center">
       </el-table-column>
       <el-table-column
           prop="start_time"
           label="开始时间"
           align="center"
-          width="150"
+          width="200"
           :formatter="dateFormat">
       </el-table-column>
       <el-table-column
           prop="end_time"
           label="结束时间"
           align="center"
-          width="150"
+          width="200"
           :formatter="dateFormat">
       </el-table-column>
       <el-table-column
@@ -65,26 +65,27 @@
           prop="status"
           label="执行状态"
           align="center"
-          width="100">
+          width="150">
         <template slot-scope="scope">
           <el-button v-if="scope.row.status === 0" type="success" icon="el-icon-check" circle></el-button>
           <el-button v-if="scope.row.status === -1" type="danger" icon="el-icon-close" circle></el-button>
         </template>
       </el-table-column>
       <el-table-column
-          prop="out_put"
-          label="输出"
-          width="300"
-          align="center">
-      </el-table-column>
-      <el-table-column
-          prop="error"
-          label="错误信息"
-          width="300"
-          align="center">
+          prop="run_worker"
+          label="执行节点"
+          align="center"
+          width="250">
       </el-table-column>
       <el-table-column align="center" label="操作">
-
+        <template slot-scope="scope">
+          <el-popover placement="bottom"
+                      trigger="hover"
+                      width="1000">
+            <LogInfo :out_put="scope.row.out_put" :error="scope.row.error"></LogInfo>
+            <el-button slot="reference">查看输出</el-button>
+          </el-popover>
+        </template>
       </el-table-column>
     </el-table>
     <div class="page-content">
@@ -105,10 +106,12 @@
 import tableInfo from '@/plugins/mixins/tableInfo'
 import {getLogList} from "@/api/log";
 import dateTool from "@/plugins/mixins/dateTool";
+import LogInfo from "./cpns/LogInfo";
 
 export default {
   name: "LogList",
   mixins: [tableInfo, dateTool],
+  components: {LogInfo},
   data() {
     return {
       searchForm: {
