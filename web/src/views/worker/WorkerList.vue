@@ -1,15 +1,14 @@
 <template>
   <div>
     <el-form ref="searchForm" :model="searchForm" :inline="true">
-      <el-form-item label="执行状态" prop="condition">
+      <el-form-item label="节点状态" prop="condition">
         <el-select style="width: 120px" v-model.number="searchForm.status">
           <el-option v-for="v in lStatus" :key="v.value" :label="v.label" :value="v.value"/>
         </el-select>
       </el-form-item>
       <el-form-item label="筛选条件" prop="condition">
         <el-select style="width: 120px" v-model="searchForm.sCondition" placeholder="请选择">
-          <el-option key="task_name" label="任务名称" value="task_name"/>
-          <el-option key="task_id" label="任务ID" value="task_id"/>
+          <el-option key="task_name" label="节点IP" value="task_name"/>
         </el-select>
       </el-form-item>
       <el-form-item prop="searchValue">
@@ -21,67 +20,26 @@
     </el-form>
     <el-table :data="tableData" border style="width: 100%">
       <el-table-column
-          prop="log_id"
+          prop="worker_id"
           label="ID"
           width="120"
           align="center">
       </el-table-column>
       <el-table-column
-          prop="task_id"
-          label="任务ID"
-          width="120"
-          align="center">
-      </el-table-column>
-      <el-table-column
-          prop="Task.task_name"
-          label="任务名称"
-          width="200"
-          align="center">
-      </el-table-column>
-      <el-table-column
-          prop="start_time"
-          label="开始时间"
+          prop="worker_ip"
+          label="节点IP"
           align="center"
-          width="150"
-          :formatter="dateFormat">
-      </el-table-column>
-      <el-table-column
-          prop="end_time"
-          label="结束时间"
-          align="center"
-          width="150"
-          :formatter="dateFormat">
-      </el-table-column>
-      <el-table-column
-          prop="process_time"
-          label="消耗时间(s)"
-          align="center"
-          width="100">
-        <template slot-scope="scope">
-          {{ scope.row.end_time - scope.row.start_time }}s
-        </template>
+          width="150">
       </el-table-column>
       <el-table-column
           prop="status"
-          label="执行状态"
+          label="节点状态"
           align="center"
           width="100">
         <template slot-scope="scope">
           <el-button v-if="scope.row.status === 0" type="success" icon="el-icon-check" circle></el-button>
           <el-button v-if="scope.row.status === -1" type="danger" icon="el-icon-close" circle></el-button>
         </template>
-      </el-table-column>
-      <el-table-column
-          prop="out_put"
-          label="输出"
-          width="300"
-          align="center">
-      </el-table-column>
-      <el-table-column
-          prop="error"
-          label="错误信息"
-          width="300"
-          align="center">
       </el-table-column>
       <el-table-column align="center" label="操作">
 
@@ -103,11 +61,11 @@
 
 <script>
 import tableInfo from '@/plugins/mixins/tableInfo'
-import {getLogList} from "@/api/log";
+import {getWorkerList} from "@/api/worker";
 import dateTool from "@/plugins/mixins/dateTool";
 
 export default {
-  name: "LogList",
+  name: "WorkerList",
   mixins: [tableInfo, dateTool],
   data() {
     return {
@@ -131,14 +89,10 @@ export default {
     }
   },
   created() {
-    if (this.$route.query.sCondition !== undefined && this.$route.query.sValue !== undefined) {
-      this.searchForm.sCondition = this.$route.query.sCondition
-      this.searchForm.sValue = this.$route.query.sValue
-    }
     this.getTableData()
   },
   methods: {
-    getList: getLogList
+    getList: getWorkerList
   }
 }
 </script>

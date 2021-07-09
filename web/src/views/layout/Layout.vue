@@ -13,7 +13,7 @@
           <bread-crumb/>
         </div>
         <div class="main-content">
-          <keep-alive>
+          <keep-alive exclude="TaskList,LogList">
             <router-view/>
           </keep-alive>
         </div>

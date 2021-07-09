@@ -34,12 +34,13 @@ type DbConfig struct {
 }
 
 type EtcdConfig struct {
-	EtcdEndpoints   []string `json:"etcdEndpoints"`
-	EtcdDialTimeout int      `json:"etcdDialTimeout"`
-	JobCronPrefix   string   `json:"jobCronPrefix"`
-	JobLockPrefix   string   `json:"jobLockPrefix"`
-	JobRunPrefix    string   `json:"jobRunPrefix"`
-	JobKillPrefix   string   `json:"jobKillPrefix"`
+	EtcdEndpoints    []string `json:"etcdEndpoints"`
+	EtcdDialTimeout  int      `json:"etcdDialTimeout"`
+	JobCronPrefix    string   `json:"jobCronPrefix"`
+	JobLockPrefix    string   `json:"jobLockPrefix"`
+	JobRunPrefix     string   `json:"jobRunPrefix"`
+	JobKillPrefix    string   `json:"jobKillPrefix"`
+	JobWorkersPrefix string   `json:"jobWorkersPrefix"`
 }
 
 func InitConfig() {

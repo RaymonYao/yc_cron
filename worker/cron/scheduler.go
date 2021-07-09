@@ -44,11 +44,12 @@ func InitScheduler() {
 					errStr = ""
 				}
 				_ = model.SaveTaskLog(&model.TaskLog{
-					TaskId:      jobResult.Job.Id,
-					OutPut:      jobResult.Output,
-					Error:       errStr,
-					Status:      status,
-					ProcessTime: jobResult.EndTime - jobResult.StartTime,
+					TaskId:    jobResult.Job.Id,
+					OutPut:    jobResult.Output,
+					Error:     errStr,
+					Status:    status,
+					StartTime: jobResult.StartTime,
+					EndTime:   jobResult.EndTime,
 				})
 			}
 		}

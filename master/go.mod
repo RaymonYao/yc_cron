@@ -14,6 +14,7 @@ require (
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/ugorji/go v1.2.6 // indirect
+	go.etcd.io/etcd/api/v3 v3.5.0-rc.0
 	go.etcd.io/etcd/client/v3 v3.5.0-rc.0
 	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e // indirect
 	golang.org/x/sys v0.0.0-20210616094352-59db8d763f22 // indirect

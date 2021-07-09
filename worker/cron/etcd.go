@@ -7,6 +7,7 @@ import (
 	"errors"
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientV3 "go.etcd.io/etcd/client/v3"
+	"net"
 	"strconv"
 	"strings"
 	"time"
@@ -62,6 +63,9 @@ func InitEtcd() {
 		return
 	}
 	if err = EClient.WatchKillJobs(); err != nil {
+		return
+	}
+	if err = EClient.InitRegister(); err != nil {
 		return
 	}
 	return
@@ -267,7 +271,96 @@ FAIL:
 // Unlock 释放锁
 func (jobLock *JobLock) Unlock() {
 	if jobLock.IsLocked {
-		jobLock.CancelFunc()                                  //取消我们程序自动续租的协程
-		EClient.Lease.Revoke(context.TODO(), jobLock.LeaseId) //释放租约
+		jobLock.CancelFunc() //取消我们程序自动续租的协程
+		_, err := EClient.Lease.Revoke(context.TODO(), jobLock.LeaseId)
+		if err != nil {
+			return
+		} //释放租约
 	}
+}
+
+func (eClient *Etcd) InitRegister() (err error) {
+	var (
+		leaseGrantResp *clientV3.LeaseGrantResponse
+		keepAliveResp  *clientV3.LeaseKeepAliveResponse
+		keepAliveChan  <-chan *clientV3.LeaseKeepAliveResponse
+		cancelCtx      context.Context
+		cancelFunc     context.CancelFunc
+		localIp        string
+	)
+	//本机IP
+	if localIp, err = getLocalIP(); err != nil {
+		return
+	}
+
+	//服务注册
+	for {
+		//注册路径
+		regKey := config.GConfig.EtcdConfig.JobWorkersPrefix + localIp
+		cancelFunc = nil
+
+		//创建租约
+		if leaseGrantResp, err = eClient.Lease.Grant(context.TODO(), 10); err != nil {
+			goto RETRY
+		}
+
+		//自动续租
+		if keepAliveChan, err = eClient.Lease.KeepAlive(context.TODO(), leaseGrantResp.ID); err != nil {
+			goto RETRY
+		}
+
+		cancelCtx, cancelFunc = context.WithCancel(context.TODO())
+
+		//注册到etcd
+		if _, err = eClient.Kv.Put(cancelCtx, regKey, "", clientV3.WithLease(leaseGrantResp.ID)); err != nil {
+			goto RETRY
+		}
+
+		//处理续租应答
+		for {
+			select {
+			case keepAliveResp = <-keepAliveChan:
+				if keepAliveResp == nil {
+					//续租失败
+					goto RETRY
+				}
+			}
+		}
+
+	RETRY:
+		time.Sleep(1 * time.Second)
+		if cancelFunc != nil {
+			cancelFunc()
+		}
+	}
+}
+
+//获取本机网卡IP
+func getLocalIP() (ipv4 string, err error) {
+	var (
+		addrs   []net.Addr
+		addr    net.Addr
+		ipNet   *net.IPNet //IP地址
+		isIpNet bool
+	)
+
+	//获取所有网卡
+	if addrs, err = net.InterfaceAddrs(); err != nil {
+		return
+	}
+
+	//取第一个非lo的网卡IP
+	for _, addr = range addrs {
+		//这个网络地址是IP地址: ipv4,ipv6
+		if ipNet, isIpNet = addr.(*net.IPNet); isIpNet && !ipNet.IP.IsLoopback() {
+			//跳过IPV6
+			if ipNet.IP.To4() != nil {
+				ipv4 = ipNet.IP.String() //192.168.1.1
+				return
+			}
+		}
+	}
+
+	err = errors.New("没有找到网卡IP")
+	return
 }

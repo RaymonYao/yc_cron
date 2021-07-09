@@ -6,14 +6,15 @@ import (
 )
 
 type TaskLog struct {
-	LogId       int    `json:"log_id" gorm:"PRIMARY_KEY"`
-	TaskId      int    `json:"task_id"`
-	OutPut      string `json:"out_put"`
-	Error       string `json:"error"`
-	Status      int    `json:"status"`
-	ProcessTime int64  `json:"process_time"`
-	CreateTime  int64  `json:"create_time"`
-	Task        Task
+	LogId      int    `json:"log_id" gorm:"PRIMARY_KEY"`
+	TaskId     int    `json:"task_id"`
+	OutPut     string `json:"out_put"`
+	Error      string `json:"error"`
+	Status     int    `json:"status"`
+	StartTime  int64  `json:"start_time"`
+	EndTime    int64  `json:"end_time"`
+	CreateTime int64  `json:"create_time"`
+	Task       Task
 }
 
 func GetLogList(search *request.ComPageInfo) (logList []TaskLog, total int, err error) {
@@ -40,7 +41,7 @@ func GetLogList(search *request.ComPageInfo) (logList []TaskLog, total int, err 
 	if search.PageSize == 0 {
 		err = db.Find(&logList).Error
 	} else {
-		err = db.Limit(search.PageSize).Offset(search.PageSize * (search.CurrentPage - 1)).Find(&logList).Error
+		err = db.Order("log_id desc").Limit(search.PageSize).Offset(search.PageSize * (search.CurrentPage - 1)).Find(&logList).Error
 		if err != nil {
 			return
 		}

@@ -47,5 +47,9 @@ func InitRouters() (router *gin.Engine) {
 	{
 		logRouter.POST("getLogList", GetLogList)
 	}
+	workerRouter := routerGroup.Group("worker").Use(middleware.JWTAuth())
+	{
+		workerRouter.POST("getWorkerList", GetWorkerList)
+	}
 	return
 }

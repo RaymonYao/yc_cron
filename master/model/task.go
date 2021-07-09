@@ -41,7 +41,7 @@ func GetTaskList(search *request.ComPageInfo) (taskList []Task, total int, err e
 	if search.PageSize == 0 {
 		err = db.Find(&taskList).Error
 	} else {
-		err = db.Limit(search.PageSize).Offset(search.PageSize * (search.CurrentPage - 1)).Find(&taskList).Error
+		err = db.Order("task_id desc").Limit(search.PageSize).Offset(search.PageSize * (search.CurrentPage - 1)).Find(&taskList).Error
 		if err != nil {
 			return
 		}

@@ -28,7 +28,7 @@ func GetGroupList(search *request.BasePageInfo) (groupList []Group, total int, e
 	if search.PageSize == 0 {
 		err = db.Find(&groupList).Error
 	} else {
-		err = db.Limit(search.PageSize).Offset(search.PageSize * (search.CurrentPage - 1)).Find(&groupList).Error
+		err = db.Order("group_id desc").Limit(search.PageSize).Offset(search.PageSize * (search.CurrentPage - 1)).Find(&groupList).Error
 	}
 	return
 }

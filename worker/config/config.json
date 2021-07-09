@@ -20,6 +20,7 @@
     "jobCronPrefix": "job_cron_",
     "jobLockPrefix": "job_lock_",
     "jobRunPrefix": "job_run_",
-    "jobKillPrefix": "job_kill_"
+    "jobKillPrefix": "job_kill_",
+    "jobWorkersPrefix": "job_workers_"
   }
 }

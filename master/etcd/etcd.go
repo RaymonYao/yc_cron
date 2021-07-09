@@ -5,8 +5,10 @@ import (
 	"cron_master/config"
 	"encoding/json"
 	"fmt"
+	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientV3 "go.etcd.io/etcd/client/v3"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -166,6 +168,30 @@ func (eClient *Etcd) KillJob(taskId int) (err error) {
 	//保存到etcd
 	if _, err = eClient.Kv.Put(context.TODO(), jobKillKey, "", clientV3.WithLease(leaseId)); err != nil {
 		return
+	}
+	return
+}
+
+// ListWorkers 获取在线worker列表
+func (eClient *Etcd) ListWorkers() (workerList []string, err error) {
+	var (
+		getResp  *clientV3.GetResponse
+		kv       *mvccpb.KeyValue
+		workerIP string
+	)
+
+	//初始化数组
+	workerList = make([]string, 0)
+
+	//获取目录下所有Kv
+	if getResp, err = eClient.Kv.Get(context.TODO(), config.GConfig.EtcdConfig.JobWorkersPrefix, clientV3.WithPrefix()); err != nil {
+		return
+	}
+
+	//解析每个节点的IP
+	for _, kv = range getResp.Kvs {
+		workerIP = strings.TrimPrefix(string(kv.Key), config.GConfig.EtcdConfig.JobWorkersPrefix)
+		workerList = append(workerList, workerIP)
 	}
 	return
 }
