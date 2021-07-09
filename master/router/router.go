@@ -50,6 +50,8 @@ func InitRouters() (router *gin.Engine) {
 	workerRouter := routerGroup.Group("worker").Use(middleware.JWTAuth())
 	{
 		workerRouter.POST("getWorkerList", GetWorkerList)
+		workerRouter.POST("saveWorker", SaveWorker)
+		workerRouter.POST("delWorker", DelWorker)
 	}
 	return
 }

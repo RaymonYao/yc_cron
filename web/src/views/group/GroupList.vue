@@ -43,8 +43,8 @@
       </el-table-column>
       <el-table-column align="center" label="操作">
         <template slot-scope="scope">
-          <el-button circle type="primary" @click="showGroupEdit(scope.row)" icon="el-icon-edit"></el-button>
-          <el-button type="danger" icon="el-icon-delete" circle @click="delGroup(scope.row)"
+          <el-button title="编辑" circle type="primary" @click="showGroupEdit(scope.row)" icon="el-icon-edit"></el-button>
+          <el-button title="删除" type="danger" icon="el-icon-delete" circle @click="delGroup(scope.row)"
                      slot="reference"></el-button>
         </template>
       </el-table-column>
@@ -108,7 +108,6 @@ export default {
         })
       })
     }
-
   }
 }
 </script>
