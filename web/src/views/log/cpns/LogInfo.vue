@@ -3,7 +3,7 @@
     <el-divider content-position="left">输出日志</el-divider>
     <div style="margin: 0 15px 10px 15px">
       <span>输出:</span>
-      <div style="width: 100%;overflow: scroll;">
+      <div style="width:100%;height:150px;overflow:scroll; border:1px solid;">
         <pre>{{ out_put }}</pre>
       </div>
       <span>错误信息:</span> {{ error }}
