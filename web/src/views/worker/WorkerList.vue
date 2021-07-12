@@ -59,10 +59,10 @@
                      @click="delWorker(scope.row)"
                      slot="reference"></el-button>
           <el-button title="重启节点" v-show="scope.row.status === -1" type="danger" icon="el-icon-caret-right" circle
-                     @click="delWorker(scope.row)"
+                     @click="restartWorker(scope.row)"
                      slot="reference"></el-button>
           <el-button title="剔除节点" v-show="scope.row.status === 0" type="success" icon="el-icon-close-notification"
-                     circle @click="delWorker(scope.row)"
+                     circle @click="turnDownWorker(scope.row)"
                      slot="reference"></el-button>
         </template>
       </el-table-column>
@@ -140,6 +140,18 @@ export default {
           type: 'info',
           message: '已取消'
         })
+      })
+    },
+    restartWorker() {
+      this.$message({
+        type: 'info',
+        message: '等待开发'
+      })
+    },
+    turnDownWorker() {
+      this.$message({
+        type: 'info',
+        message: '等待开发'
       })
     }
   }
